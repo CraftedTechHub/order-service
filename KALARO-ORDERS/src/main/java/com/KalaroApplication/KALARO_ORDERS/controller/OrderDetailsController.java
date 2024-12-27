@@ -60,4 +60,5 @@ public class OrderDetailsController {
         OrderDetailsDto orderDetailsDto2 =orderDetailsService.passOrderDetails(orderId);
         return new ResponseEntity<>(orderDetailsDto2,HttpStatus.OK);
     }
+
 }
