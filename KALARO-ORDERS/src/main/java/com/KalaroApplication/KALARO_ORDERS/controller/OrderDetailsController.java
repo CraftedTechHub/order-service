@@ -30,10 +30,7 @@ public class OrderDetailsController {
 
     @DeleteMapping(path = "/deleteOrderDetails/{orderId}")  //DELETE ORDERS
     public ResponseEntity<String> deleteOrderDetails(@PathVariable(value = "orderId") int orderId){
-        orderDetailsService.deleteOrderDetails(orderId);
-
-        String message = "Order with order id "+orderId+" is deleted successfully";
-
+        String message = orderDetailsService.deleteOrderDetails(orderId);
         return new ResponseEntity<>(message,HttpStatus.OK);
     }
 

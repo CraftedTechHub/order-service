@@ -8,7 +8,7 @@ public interface OrderDetailsService {
     OrderDetailsDto saveOrderDetails(OrderDetailsDto order);
     OrderDetailsDto getOrderDetails(int orderId);
     OrderDetailsDto updateOrderDetails(OrderDetailsDto order);
-    void deleteOrderDetails(int orderId);
+    String deleteOrderDetails(int orderId);
 
     List<OrderDetailsDto> getAllOrderDetails();
 
