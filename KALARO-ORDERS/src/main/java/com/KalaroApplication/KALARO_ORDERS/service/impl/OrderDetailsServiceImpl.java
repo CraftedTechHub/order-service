@@ -214,9 +214,9 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                         orderDetails.getNote(),
                         orderDetails.getOrderCategory()
                 );
-                log.info("Order details fetched by category successfully");
                 orderDetailsDtoList.add(orderDetailsDto);
             }
+            log.info("Order details fetched by category successfully");
             return orderDetailsDtoList;
         } catch (Exception e) {
             log.error("Error occurred while fetching order details by category: {}", e.getMessage());
