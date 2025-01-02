@@ -22,61 +22,104 @@ public class OrderDetailsController {
     public ResponseEntity<HttpResponse> getAllOrderDetails(){
         List<OrderDetailsDto> orderDetailsDtoList = orderDetailsService.getAllOrderDetails();
         String message;
+        int statusCode;
         if(orderDetailsDtoList.isEmpty()){
             message = "No orders available at this time";
+            statusCode=404;
         }else {
             message = "Orders details fetched successfully";
+            statusCode=200;
         }
-        return new ResponseEntity<>(new HttpResponse(200,message,orderDetailsDtoList),HttpStatus.OK);
+        return new ResponseEntity<>(new HttpResponse(statusCode,message,orderDetailsDtoList),HttpStatus.OK);
     }
 
     @GetMapping(path="/getOrderDetailsByCategory/{category}") //FILTER BY CATEGORY
     public ResponseEntity<HttpResponse> getOrderDetailsByCategory(@PathVariable(value = "category") String category){
         List<OrderDetailsDto> orderDetailsDtoList = orderDetailsService.getOrderDetailsByCategory(category);
-        String message = "Order details fetched by category successfully";
-        return new ResponseEntity<>(new HttpResponse(200,message,orderDetailsDtoList),HttpStatus.OK);
-
+        String message;
+        int statusCode;
+        if(orderDetailsDtoList.isEmpty()){
+            message = "No orders available at this time";
+            statusCode = 404;
+        }else{
+            message = "Order details fetched by category successfully";
+            statusCode = 200;
+        }
+        return new ResponseEntity<>(new HttpResponse(statusCode,message,orderDetailsDtoList),HttpStatus.OK);
     }
 
     @DeleteMapping(path = "/deleteOrderDetails/{orderId}")  //DELETE ORDERS
     public ResponseEntity<StandardResponse> deleteOrderDetails(@PathVariable(value = "orderId") int orderId){
-        String message = orderDetailsService.deleteOrderDetails(orderId);
-        return new ResponseEntity<>(new StandardResponse(200,message),HttpStatus.OK);
+        int num = orderDetailsService.deleteOrderDetails(orderId);
+        String message;
+        int statusCode;
+        if(num == 0){
+            message = "Order details deletion is unsuccessful";
+            statusCode = 404;
+        }else{
+            message = "Order details deleted successfully";
+            statusCode = 200;
+        }
+        return new ResponseEntity<>(new StandardResponse(statusCode,message),HttpStatus.OK);
     }
 
     @PostMapping(path = "/addNewOrderDetails")  //ADD NEW ORDER
     public ResponseEntity<StandardResponse> addNewOrderDetails(@RequestBody OrderDetailsDto orderDetailsDto) {
-        String message = orderDetailsService.saveOrderDetails(orderDetailsDto);
-        return new ResponseEntity<>(new StandardResponse(201,message),HttpStatus.CREATED);
+        int num = orderDetailsService.saveOrderDetails(orderDetailsDto);
+        String message;
+        int statusCode;
+        if(num != 1){
+            message = "Order details saving is unsuccessful";
+            statusCode = 404;
+        }else{
+            message = "Order details saved successfully";
+            statusCode = 201;
+        }
+        return new ResponseEntity<>(new StandardResponse(statusCode,message),HttpStatus.CREATED);
     }
 
     @GetMapping(path = "/getOrderDetails/{orderId}")    //VIEW ORDER
     public ResponseEntity<HttpResponse> getOrderDetails(@PathVariable(value = "orderId") int orderId){
         OrderDetailsDto orderDetailsDto2 =orderDetailsService.getOrderDetails(orderId);
         String message;
+        int statusCode;
         if(orderDetailsDto2==null){
             message = "No order details found";
+            statusCode=404;
         }else{
             message = "Orders details fetched successfully";
+            statusCode=200;
         }
-        return new ResponseEntity<>(new HttpResponse(200,message,orderDetailsDto2),HttpStatus.OK);
+        return new ResponseEntity<>(new HttpResponse(statusCode,message,orderDetailsDto2),HttpStatus.OK);
     }
 
     @PutMapping(path = "/updateOrderDetails")   //EDIT EXIST ORDER
     public ResponseEntity<StandardResponse> updateOrderDetails(@RequestBody OrderDetailsDto orderDetailsDto){
-        String message =orderDetailsService.updateOrderDetails(orderDetailsDto);
-        return new ResponseEntity<>(new StandardResponse(200,message),HttpStatus.OK);
+        int num =orderDetailsService.updateOrderDetails(orderDetailsDto);
+        String message;
+        int statusCode;
+        if(num != 1){
+            message = "Model number is already exist, Changes unsaved";
+            statusCode=404;
+        }else{
+            message = "Orders details fetched successfully";
+            statusCode=200;
+        }
+        return new ResponseEntity<>(new StandardResponse(statusCode,message),HttpStatus.OK);
     }
 
     @GetMapping(path = "/getMasterPlan/{orderId}")    //MASTER PLAN BUTTON
     public ResponseEntity<HttpResponse> passOrderDetails(@PathVariable(value = "orderId") int orderId){
         OrderDetailsDto orderDetailsDto =orderDetailsService.passOrderDetails(orderId);
         String message;
+        int statusCode;
         if(orderDetailsDto==null){
             message = "Orders details fetched unsuccessfully";
+            statusCode=404;
         }else{
             message = "Orders details fetched successfully";
+            statusCode=200;
         }
-        return new ResponseEntity<>(new HttpResponse(200,message,orderDetailsDto),HttpStatus.OK);
+        return new ResponseEntity<>(new HttpResponse(statusCode,message,orderDetailsDto),HttpStatus.OK);
     }
 }

@@ -7,13 +7,13 @@ import com.KalaroApplication.KALARO_ORDERS.dto.component.MasterPlanSubDto;
 import java.util.List;
 
 public interface MasterPlanService {
-    String saveOrderDetails(MasterPlanDto masterPlanDto);
+    int saveOrderDetails(MasterPlanDto masterPlanDto);
 
     List<MasterPlanDto> getOrderDetails(int orderId);
 
-    String updateOrderDetails(MasterPlanDto masterPlanDto);
+    int updateOrderDetails(MasterPlanDto masterPlanDto);
 
-    String deleteOrderDetails(int planId);
+    int deleteOrderDetails(int planId);
 
     List<MasterPlanDto> getMasterPlanSubByCenter(String centerName);
 

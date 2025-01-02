@@ -18,8 +18,12 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
     private OrderDetailsRepository orderDetailsRepository;
 
     @Override
-    public String saveOrderDetails(OrderDetailsDto order) {
-        try{
+    public int saveOrderDetails(OrderDetailsDto order) {
+        OrderDetails orderDetailsList = orderDetailsRepository.findByModelNo(order.getModelNo());
+        if(orderDetailsList!=null){
+            log.error("Could not saved order details, you entered model number is exist");
+            return 0;
+        }else {
             OrderDetails orderDetails = new OrderDetails(
                     order.getOrderId(),
                     order.getModelNo(),
@@ -36,40 +40,40 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                     order.getNote(),
                     order.getOrderCategory()
             );
-
             orderDetailsRepository.save(orderDetails);
             log.info("Order details saved successfully");
-            return "Order details saved successfully";
-        } catch (Exception e) {
-            log.error("Error occurred while saving order details: {}", e.getMessage());
-            throw new RuntimeException("Failed to save order details. Please try again later.");
+            return 1;
         }
-
     }
 
     @Override
     public OrderDetailsDto getOrderDetails(int orderId) {
         try{
-            OrderDetails orderDetails = orderDetailsRepository.findByOrderId(orderId);
+            if(orderDetailsRepository.findByOrderId(orderId)==null){
+                log.error("Order Id Not found");
+                return null;
+            }else{
+                OrderDetails orderDetails = orderDetailsRepository.findByOrderId(orderId);
 
-            OrderDetailsDto orderDetailsDto = new OrderDetailsDto(
-                    orderDetails.getOrderId(),
-                    orderDetails.getModelNo(),
-                    orderDetails.getModelName(),
-                    orderDetails.getYarnType(),
-                    orderDetails.getCustomerName(),
-                    orderDetails.getSizeAndQuantity(),
-                    orderDetails.getColor(),
-                    orderDetails.getYarnImportDate(),
-                    orderDetails.getCenterSampleApprovedDate(),
-                    orderDetails.getYarnDistributionDate(),
-                    orderDetails.getOrderCompletionDate(),
-                    orderDetails.getDescription(),
-                    orderDetails.getNote(),
-                    orderDetails.getOrderCategory()
-            );
-            log.info("Order details fetched successfully");
-            return orderDetailsDto;
+                OrderDetailsDto orderDetailsDto = new OrderDetailsDto(
+                        orderDetails.getOrderId(),
+                        orderDetails.getModelNo(),
+                        orderDetails.getModelName(),
+                        orderDetails.getYarnType(),
+                        orderDetails.getCustomerName(),
+                        orderDetails.getSizeAndQuantity(),
+                        orderDetails.getColor(),
+                        orderDetails.getYarnImportDate(),
+                        orderDetails.getCenterSampleApprovedDate(),
+                        orderDetails.getYarnDistributionDate(),
+                        orderDetails.getOrderCompletionDate(),
+                        orderDetails.getDescription(),
+                        orderDetails.getNote(),
+                        orderDetails.getOrderCategory()
+                );
+                log.info("Order details fetched successfully");
+                return orderDetailsDto;
+            }
         } catch (Exception e) {
             log.error("Error occurred while fetching order details: {}", e.getMessage());
             throw new RuntimeException("Failed to fetch order details. Please try again later.");
@@ -77,26 +81,38 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
     }
 
     @Override
-    public String updateOrderDetails(OrderDetailsDto order) {
+    public int updateOrderDetails(OrderDetailsDto order) {
         try{
             OrderDetails orderDetails = orderDetailsRepository.findByOrderId(order.getOrderId());
+            List<OrderDetails> orderDetailsList = orderDetailsRepository.findAllByOrderIdNot(order.getOrderId());
+            boolean state = false;
+            for(OrderDetails orderDetails1 : orderDetailsList){
+                if(orderDetails1.getModelNo().equals( order.getModelNo())){
+                    state = true;
+                    break;
+                }
+            }
+            if(state) {
+                log.error("Model number is already exist, Changes unsaved");
+                return 0;
+            }else{
+                orderDetails.setModelNo(order.getModelNo());
+                orderDetails.setModelName(order.getModelName());
+                orderDetails.setYarnType(order.getYarnType());
+                orderDetails.setSizeAndQuantity(order.getSizeAndQuantity());
+                orderDetails.setColor(order.getColor());
+                orderDetails.setYarnImportDate(order.getYarnImportDate());
+                orderDetails.setCenterSampleApprovedDate(order.getCenterSampleApprovedDate());
+                orderDetails.setYarnDistributionDate(order.getYarnDistributionDate());
+                orderDetails.setOrderCompletionDate(order.getOrderCompletionDate());
+                orderDetails.setDescription(order.getDescription());
+                orderDetails.setNote(order.getNote());
+                orderDetails.setOrderCategory(order.getOrderCategory());
 
-            orderDetails.setModelNo(order.getModelNo());
-            orderDetails.setModelName(order.getModelName());
-            orderDetails.setYarnType(order.getYarnType());
-            orderDetails.setSizeAndQuantity(order.getSizeAndQuantity());
-            orderDetails.setColor(order.getColor());
-            orderDetails.setYarnImportDate(order.getYarnImportDate());
-            orderDetails.setCenterSampleApprovedDate(order.getCenterSampleApprovedDate());
-            orderDetails.setYarnDistributionDate(order.getYarnDistributionDate());
-            orderDetails.setOrderCompletionDate(order.getOrderCompletionDate());
-            orderDetails.setDescription(order.getDescription());
-            orderDetails.setNote(order.getNote());
-            orderDetails.setOrderCategory(order.getOrderCategory());
-
-            orderDetailsRepository.save(orderDetails);
-            log.info("Order details updated successfully");
-            return "Order details updated successfully";
+                orderDetailsRepository.save(orderDetails);
+                log.info("Order details updated successfully");
+                return 1;
+            }
         } catch (Exception e) {
             log.error("Error occurred while updating order details: {}", e.getMessage());
             throw new RuntimeException("Failed to update order details. Please try again later.");
@@ -104,17 +120,16 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
     }
 
     @Override
-    public String deleteOrderDetails(int orderId) {
+    public int deleteOrderDetails(int orderId) {
         try{
             if(orderDetailsRepository.findByOrderId(orderId) == null){
                 log.error("Order details not found");
-                return "Order details not found";
+                return 0;
             }else{
                 OrderDetails orderDetails = orderDetailsRepository.findByOrderId(orderId);
-                String message = orderDetails.getModelNo()+" "+orderDetails.getModelName() + " Order details deleted successfully";
                 orderDetailsRepository.delete(orderDetails);
                 log.info("Order details deleted successfully");
-                return message;
+                return 1;
             }
         } catch (Exception e) {
             log.error("Error occurred while deleting order details: {}", e.getMessage());
@@ -126,30 +141,35 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
     @Override
     public List<OrderDetailsDto> getAllOrderDetails() {
         try{
-            List<OrderDetails> allOrderDetails = orderDetailsRepository.findAll();
-            List<OrderDetailsDto> allOrderDetailsDtoList = new ArrayList<>();
+            if(orderDetailsRepository.findAll().isEmpty()){
+                log.error("Not found order details");
+                return null;
+            }else{
+                List<OrderDetails> allOrderDetails = orderDetailsRepository.findAll();
+                List<OrderDetailsDto> allOrderDetailsDtoList = new ArrayList<>();
 
-            for(OrderDetails orderDetails : allOrderDetails){
-                OrderDetailsDto orderDetailsDto = new OrderDetailsDto(
-                        orderDetails.getOrderId(),
-                        orderDetails.getModelNo(),
-                        orderDetails.getModelName(),
-                        orderDetails.getYarnType(),
-                        orderDetails.getCustomerName(),
-                        orderDetails.getSizeAndQuantity(),
-                        orderDetails.getColor(),
-                        orderDetails.getYarnImportDate(),
-                        orderDetails.getCenterSampleApprovedDate(),
-                        orderDetails.getYarnDistributionDate(),
-                        orderDetails.getOrderCompletionDate(),
-                        orderDetails.getDescription(),
-                        orderDetails.getNote(),
-                        orderDetails.getOrderCategory()
-                );
-                allOrderDetailsDtoList.add(orderDetailsDto);
+                for(OrderDetails orderDetails : allOrderDetails){
+                    OrderDetailsDto orderDetailsDto = new OrderDetailsDto(
+                            orderDetails.getOrderId(),
+                            orderDetails.getModelNo(),
+                            orderDetails.getModelName(),
+                            orderDetails.getYarnType(),
+                            orderDetails.getCustomerName(),
+                            orderDetails.getSizeAndQuantity(),
+                            orderDetails.getColor(),
+                            orderDetails.getYarnImportDate(),
+                            orderDetails.getCenterSampleApprovedDate(),
+                            orderDetails.getYarnDistributionDate(),
+                            orderDetails.getOrderCompletionDate(),
+                            orderDetails.getDescription(),
+                            orderDetails.getNote(),
+                            orderDetails.getOrderCategory()
+                    );
+                    allOrderDetailsDtoList.add(orderDetailsDto);
+                }
+                log.info("All order details fetched successfully");
+                return allOrderDetailsDtoList;
             }
-            log.info("All order details fetched successfully");
-            return allOrderDetailsDtoList;
         } catch (Exception e) {
             log.error("Error occurred while fetching all order details: {}", e.getMessage());
             throw new RuntimeException("Failed to fetch order details. Please try again later.");
@@ -159,30 +179,35 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
     @Override
     public List<OrderDetailsDto> getOrderDetailsByCategory(String category) {
         try{
-            List<OrderDetails> allOngoingOrderDetails = orderDetailsRepository.findAllByOrderCategory(category);
-            List<OrderDetailsDto> orderDetailsDtoList = new ArrayList<>();
+            if(orderDetailsRepository.findAllByOrderCategory(category).isEmpty()){
+                log.error("Not found order details");
+                return null;
+            }else{
+                List<OrderDetails> allOngoingOrderDetails = orderDetailsRepository.findAllByOrderCategory(category);
+                List<OrderDetailsDto> orderDetailsDtoList = new ArrayList<>();
 
-            for(OrderDetails orderDetails : allOngoingOrderDetails){
-                OrderDetailsDto orderDetailsDto = new OrderDetailsDto(
-                        orderDetails.getOrderId(),
-                        orderDetails.getModelNo(),
-                        orderDetails.getModelName(),
-                        orderDetails.getYarnType(),
-                        orderDetails.getCustomerName(),
-                        orderDetails.getSizeAndQuantity(),
-                        orderDetails.getColor(),
-                        orderDetails.getYarnImportDate(),
-                        orderDetails.getCenterSampleApprovedDate(),
-                        orderDetails.getYarnDistributionDate(),
-                        orderDetails.getOrderCompletionDate(),
-                        orderDetails.getDescription(),
-                        orderDetails.getNote(),
-                        orderDetails.getOrderCategory()
-                );
-                orderDetailsDtoList.add(orderDetailsDto);
+                for(OrderDetails orderDetails : allOngoingOrderDetails){
+                    OrderDetailsDto orderDetailsDto = new OrderDetailsDto(
+                            orderDetails.getOrderId(),
+                            orderDetails.getModelNo(),
+                            orderDetails.getModelName(),
+                            orderDetails.getYarnType(),
+                            orderDetails.getCustomerName(),
+                            orderDetails.getSizeAndQuantity(),
+                            orderDetails.getColor(),
+                            orderDetails.getYarnImportDate(),
+                            orderDetails.getCenterSampleApprovedDate(),
+                            orderDetails.getYarnDistributionDate(),
+                            orderDetails.getOrderCompletionDate(),
+                            orderDetails.getDescription(),
+                            orderDetails.getNote(),
+                            orderDetails.getOrderCategory()
+                    );
+                    orderDetailsDtoList.add(orderDetailsDto);
+                }
+                log.info("Order details fetched by category successfully");
+                return orderDetailsDtoList;
             }
-            log.info("Order details fetched by category successfully");
-            return orderDetailsDtoList;
         } catch (Exception e) {
             log.error("Error occurred while fetching order details by category: {}", e.getMessage());
             throw new RuntimeException("Failed to fetch order details by category. Please try again later.");
@@ -192,15 +217,20 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
     @Override
     public OrderDetailsDto passOrderDetails(int orderId) {
         try{
-            OrderDetails orderDetails = orderDetailsRepository.findByOrderId(orderId);
+            if(orderDetailsRepository.findByOrderId(orderId) == null){
+                log.error("Order Id not found");
+                return null;
+            }else{
+                OrderDetails orderDetails = orderDetailsRepository.findByOrderId(orderId);
 
-            OrderDetailsDto orderDetailsDto = new OrderDetailsDto();
-            orderDetailsDto.setOrderId(orderDetails.getOrderId());
-            orderDetailsDto.setCustomerName(orderDetails.getCustomerName());
-            orderDetailsDto.setYarnType(orderDetails.getYarnType());
+                OrderDetailsDto orderDetailsDto = new OrderDetailsDto();
+                orderDetailsDto.setOrderId(orderDetails.getOrderId());
+                orderDetailsDto.setCustomerName(orderDetails.getCustomerName());
+                orderDetailsDto.setYarnType(orderDetails.getYarnType());
 
-            log.info("Order details passed successfully");
-            return orderDetailsDto;
+                log.info("Order details passed successfully");
+                return orderDetailsDto;
+            }
         } catch (Exception e) {
             log.error("Error occurred while passing order details: {}", e.getMessage());
             throw new RuntimeException("Failed to pass order details. Please try again later.");
