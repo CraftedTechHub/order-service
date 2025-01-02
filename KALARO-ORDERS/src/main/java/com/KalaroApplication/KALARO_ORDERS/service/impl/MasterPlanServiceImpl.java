@@ -29,7 +29,7 @@ public class MasterPlanServiceImpl implements MasterPlanService {
     private MasterPlanSubRepository masterPlanSubRepository;
 
     @Override
-    public String saveOrderDetails(MasterPlanDto masterPlanDto) {
+    public int saveOrderDetails(MasterPlanDto masterPlanDto) {
         try{
             MasterPlan masterPlan = new MasterPlan();
 
@@ -53,10 +53,10 @@ public class MasterPlanServiceImpl implements MasterPlanService {
             masterPlan.setSubPlans(masterPlanSubList);
             masterPlanRepository.save(masterPlan);
             log.info("Order details saved successfully");
-            return "Data saved successfully";
+            return 1;
         } catch (Exception e) {
             log.error("Error occurred while saving order details of Master Plan: {}", e.getMessage());
-            return "Error occurred while saving order details of Master Plan";
+            return 0;
         }
     }
 
@@ -64,7 +64,6 @@ public class MasterPlanServiceImpl implements MasterPlanService {
     public List<MasterPlanDto> getOrderDetails(int orderId) {
         try{
             List<MasterPlan> masterPlanList = masterPlanRepository.findAllByOrderId(orderId);
-
             List<MasterPlanDto> masterPlanDtoList = new ArrayList<>();
 
             for(MasterPlan masterPlan:masterPlanList){
@@ -97,7 +96,7 @@ public class MasterPlanServiceImpl implements MasterPlanService {
     }
 
     @Override
-    public String updateOrderDetails(MasterPlanDto masterPlanDto) {
+    public int updateOrderDetails(MasterPlanDto masterPlanDto) {
         try{
             MasterPlan existingMasterPlan = masterPlanRepository.findById(masterPlanDto.getPlanId())
                     .orElseThrow(() -> new RuntimeException("MasterPlan not found for ID: " + masterPlanDto.getPlanId()));
@@ -146,24 +145,24 @@ public class MasterPlanServiceImpl implements MasterPlanService {
             // Save updated MasterPlan
             masterPlanRepository.save(existingMasterPlan);
             log.info("Order details updated successfully, including new sub-plans.");
-            return "Order details updated successfully, including new sub-plans.";
+            return 1;
         } catch (Exception e) {
             log.error("Error occurred while updating order details of Master Plan: {}", e.getMessage());
-            return "Error occurred while updating order details of Master Plan";
+            return 0;
         }
 
     }
 
     @Override
-    public String deleteOrderDetails(int planId) {
+    public int deleteOrderDetails(int planId) {
         try{
             MasterPlan masterPlan = masterPlanRepository.findById(planId)
                     .orElseThrow(() -> new RuntimeException("MasterPlan not found for ID: " + planId));
             masterPlanRepository.delete(masterPlan);
-            return "Order details deleted successfully";
+            return 1;
         } catch (Exception e) {
             log.error("Error occurred while deleting order details of Master Plan: {}", e.getMessage());
-            return "Error occurred while deleting order details of Master Plan";
+            return 0;
         }
     }
 

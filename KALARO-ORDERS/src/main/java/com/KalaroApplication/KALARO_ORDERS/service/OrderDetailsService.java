@@ -5,13 +5,13 @@ import com.KalaroApplication.KALARO_ORDERS.dto.OrderDetailsDto;
 import java.util.List;
 
 public interface OrderDetailsService {
-    String saveOrderDetails(OrderDetailsDto order);
+    int saveOrderDetails(OrderDetailsDto order);
 
     OrderDetailsDto getOrderDetails(int orderId);
 
-    String updateOrderDetails(OrderDetailsDto order);
+    int updateOrderDetails(OrderDetailsDto order);
 
-    String deleteOrderDetails(int orderId);
+    int deleteOrderDetails(int orderId);
 
     List<OrderDetailsDto> getAllOrderDetails();
 

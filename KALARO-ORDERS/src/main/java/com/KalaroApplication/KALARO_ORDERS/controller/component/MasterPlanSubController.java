@@ -16,7 +16,7 @@ public class MasterPlanSubController {
     @Autowired
     private MasterPlanSubService masterPlanSubService;
 
-    @GetMapping(path = "/getMasterPlanSubByCenter/{centerName}")  //GET MASTER PLAN ID BY CENTER
+    @GetMapping(path = "/getMasterPlanSubByCenter/{centerName}")  //GET MASTER PLAN ID BY CENTER (This is not used yet)
     public List<Integer> getMasterPlanSubByCenter(@PathVariable String centerName){
         List<Integer> masterPlanSubDtoList = masterPlanSubService.getMasterPlanSubByCenter(centerName);
         return masterPlanSubDtoList;
