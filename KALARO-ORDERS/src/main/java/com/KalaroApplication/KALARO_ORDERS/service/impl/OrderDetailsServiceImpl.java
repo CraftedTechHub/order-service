@@ -4,7 +4,6 @@ import com.KalaroApplication.KALARO_ORDERS.dto.OrderDetailsDto;
 import com.KalaroApplication.KALARO_ORDERS.entity.OrderDetails;
 import com.KalaroApplication.KALARO_ORDERS.repository.OrderDetailsRepository;
 import com.KalaroApplication.KALARO_ORDERS.service.OrderDetailsService;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +18,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
     private OrderDetailsRepository orderDetailsRepository;
 
     @Override
-    public OrderDetailsDto saveOrderDetails(OrderDetailsDto order) {
+    public String saveOrderDetails(OrderDetailsDto order) {
         try{
             OrderDetails orderDetails = new OrderDetails(
                     order.getOrderId(),
@@ -38,26 +37,9 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                     order.getOrderCategory()
             );
 
-            OrderDetails savedOrderDetails = orderDetailsRepository.save(orderDetails);
+            orderDetailsRepository.save(orderDetails);
             log.info("Order details saved successfully");
-
-            OrderDetailsDto orderDetailsDto = new OrderDetailsDto(
-                    savedOrderDetails.getOrderId(),
-                    savedOrderDetails.getModelNo(),
-                    savedOrderDetails.getModelName(),
-                    savedOrderDetails.getYarnType(),
-                    savedOrderDetails.getCustomerName(),
-                    savedOrderDetails.getSizeAndQuantity(),
-                    savedOrderDetails.getColor(),
-                    savedOrderDetails.getYarnImportDate(),
-                    savedOrderDetails.getCenterSampleApprovedDate(),
-                    savedOrderDetails.getYarnDistributionDate(),
-                    savedOrderDetails.getOrderCompletionDate(),
-                    savedOrderDetails.getDescription(),
-                    savedOrderDetails.getNote(),
-                    savedOrderDetails.getOrderCategory()
-            );
-            return orderDetailsDto;
+            return "Order details saved successfully";
         } catch (Exception e) {
             log.error("Error occurred while saving order details: {}", e.getMessage());
             throw new RuntimeException("Failed to save order details. Please try again later.");
@@ -95,7 +77,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
     }
 
     @Override
-    public OrderDetailsDto updateOrderDetails(OrderDetailsDto order) {
+    public String updateOrderDetails(OrderDetailsDto order) {
         try{
             OrderDetails orderDetails = orderDetailsRepository.findByOrderId(order.getOrderId());
 
@@ -112,26 +94,9 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
             orderDetails.setNote(order.getNote());
             orderDetails.setOrderCategory(order.getOrderCategory());
 
-            OrderDetails updatedOrderDetails = orderDetailsRepository.save(orderDetails);
+            orderDetailsRepository.save(orderDetails);
             log.info("Order details updated successfully");
-
-            OrderDetailsDto orderDetailsDto = new OrderDetailsDto(
-                    updatedOrderDetails.getOrderId(),
-                    updatedOrderDetails.getModelNo(),
-                    updatedOrderDetails.getModelName(),
-                    updatedOrderDetails.getYarnType(),
-                    updatedOrderDetails.getCustomerName(),
-                    updatedOrderDetails.getSizeAndQuantity(),
-                    updatedOrderDetails.getColor(),
-                    updatedOrderDetails.getYarnImportDate(),
-                    updatedOrderDetails.getCenterSampleApprovedDate(),
-                    updatedOrderDetails.getYarnDistributionDate(),
-                    updatedOrderDetails.getOrderCompletionDate(),
-                    updatedOrderDetails.getDescription(),
-                    updatedOrderDetails.getNote(),
-                    updatedOrderDetails.getOrderCategory()
-            );
-            return orderDetailsDto;
+            return "Order details updated successfully";
         } catch (Exception e) {
             log.error("Error occurred while updating order details: {}", e.getMessage());
             throw new RuntimeException("Failed to update order details. Please try again later.");
