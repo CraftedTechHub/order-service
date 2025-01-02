@@ -16,5 +16,6 @@ public class MasterPlanDto {
     private String color;
     private String size;
     private int orderQuantity;
+    private String orderCategory;
     private List<MasterPlanSubDto> subPlans;
 }

@@ -6,8 +6,11 @@ import java.util.List;
 
 public interface OrderDetailsService {
     OrderDetailsDto saveOrderDetails(OrderDetailsDto order);
+
     OrderDetailsDto getOrderDetails(int orderId);
+
     OrderDetailsDto updateOrderDetails(OrderDetailsDto order);
+
     String deleteOrderDetails(int orderId);
 
     List<OrderDetailsDto> getAllOrderDetails();

@@ -28,7 +28,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                     order.getYarnType(),
                     order.getCustomerName(),
                     order.getSizeAndQuantity(),
-                    order.getColors(),
+                    order.getColor(),
                     order.getYarnImportDate(),
                     order.getCenterSampleApprovedDate(),
                     order.getYarnDistributionDate(),
@@ -48,7 +48,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                     savedOrderDetails.getYarnType(),
                     savedOrderDetails.getCustomerName(),
                     savedOrderDetails.getSizeAndQuantity(),
-                    savedOrderDetails.getColors(),
+                    savedOrderDetails.getColor(),
                     savedOrderDetails.getYarnImportDate(),
                     savedOrderDetails.getCenterSampleApprovedDate(),
                     savedOrderDetails.getYarnDistributionDate(),
@@ -77,7 +77,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                     orderDetails.getYarnType(),
                     orderDetails.getCustomerName(),
                     orderDetails.getSizeAndQuantity(),
-                    orderDetails.getColors(),
+                    orderDetails.getColor(),
                     orderDetails.getYarnImportDate(),
                     orderDetails.getCenterSampleApprovedDate(),
                     orderDetails.getYarnDistributionDate(),
@@ -103,7 +103,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
             orderDetails.setModelName(order.getModelName());
             orderDetails.setYarnType(order.getYarnType());
             orderDetails.setSizeAndQuantity(order.getSizeAndQuantity());
-            orderDetails.setColors(order.getColors());
+            orderDetails.setColor(order.getColor());
             orderDetails.setYarnImportDate(order.getYarnImportDate());
             orderDetails.setCenterSampleApprovedDate(order.getCenterSampleApprovedDate());
             orderDetails.setYarnDistributionDate(order.getYarnDistributionDate());
@@ -122,7 +122,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                     updatedOrderDetails.getYarnType(),
                     updatedOrderDetails.getCustomerName(),
                     updatedOrderDetails.getSizeAndQuantity(),
-                    updatedOrderDetails.getColors(),
+                    updatedOrderDetails.getColor(),
                     updatedOrderDetails.getYarnImportDate(),
                     updatedOrderDetails.getCenterSampleApprovedDate(),
                     updatedOrderDetails.getYarnDistributionDate(),
@@ -172,7 +172,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                         orderDetails.getYarnType(),
                         orderDetails.getCustomerName(),
                         orderDetails.getSizeAndQuantity(),
-                        orderDetails.getColors(),
+                        orderDetails.getColor(),
                         orderDetails.getYarnImportDate(),
                         orderDetails.getCenterSampleApprovedDate(),
                         orderDetails.getYarnDistributionDate(),
@@ -205,7 +205,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                         orderDetails.getYarnType(),
                         orderDetails.getCustomerName(),
                         orderDetails.getSizeAndQuantity(),
-                        orderDetails.getColors(),
+                        orderDetails.getColor(),
                         orderDetails.getYarnImportDate(),
                         orderDetails.getCenterSampleApprovedDate(),
                         orderDetails.getYarnDistributionDate(),
@@ -241,5 +241,4 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
             throw new RuntimeException("Failed to pass order details. Please try again later.");
         }
     }
-
 }
