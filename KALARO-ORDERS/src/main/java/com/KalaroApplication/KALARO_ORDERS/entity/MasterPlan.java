@@ -18,19 +18,15 @@ public class MasterPlan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int planId;
-
     @Column(nullable = false)
     private int orderId;
-
     @Column(nullable = false)
     private String color;
-
     @Column(nullable = false)
     private String size;
-
     @Column(nullable = false)
     private int orderQuantity;
-
+    private String orderCategory;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "fk_master_planId",referencedColumnName = "planId")
     private List<MasterPlanSub> subPlans;

@@ -17,7 +17,7 @@ public class OrderDetailsDto {
     private String yarnType;
     private String customerName;
     private List<String> sizeAndQuantity;
-    private List<String> colors;
+    private String color;
     private String yarnImportDate;
     private String centerSampleApprovedDate;
     private String yarnDistributionDate;
