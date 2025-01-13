@@ -236,4 +236,38 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
             throw new RuntimeException("Failed to pass order details. Please try again later.");
         }
     }
+
+    @Override
+    public OrderDetailsDto getOrderDetailsFromModelNo(String modelNo) {
+        try{
+            OrderDetails orderDetails = orderDetailsRepository.findByModelNo(modelNo);
+            if(orderDetails==null){
+                log.error("Order Number Not found");
+                return null;
+            }
+
+            OrderDetailsDto orderDetailsDto = new OrderDetailsDto(
+                    orderDetails.getOrderId(),
+                    orderDetails.getModelNo(),
+                    orderDetails.getModelName(),
+                    orderDetails.getYarnType(),
+                    orderDetails.getCustomerName(),
+                    orderDetails.getSizeAndQuantity(),
+                    orderDetails.getColor(),
+                    orderDetails.getYarnImportDate(),
+                    orderDetails.getCenterSampleApprovedDate(),
+                    orderDetails.getYarnDistributionDate(),
+                    orderDetails.getOrderCompletionDate(),
+                    orderDetails.getDescription(),
+                    orderDetails.getNote(),
+                    orderDetails.getOrderCategory()
+            );
+            log.info("Order details fetched successfully");
+            return orderDetailsDto;
+
+        } catch (Exception e) {
+            log.error("Error occurred while fetching order details: {}", e.getMessage());
+            throw new RuntimeException("Failed to fetch order details. Please try again later.");
+        }
+    }
 }
