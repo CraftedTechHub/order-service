@@ -79,16 +79,9 @@ public class MasterPlanController {
     }
 
     @GetMapping(path = "/getMasterPlanByCenter/{centerName}")  //GET MASTER PLAN BY CENTER
-    public ResponseEntity<HttpResponse> getMasterPlanSubByCenter(@PathVariable String centerName){
+    public ResponseEntity<List<MasterPlanDto>> getMasterPlanSubByCenter(@PathVariable String centerName){
         List<MasterPlanDto> masterPlanDtoList = masterPlanService.getMasterPlanSubByCenter(centerName);
-        if(masterPlanDtoList.isEmpty()){
-            message = "Error occurred while fetching order sub plan details of Master Plan";
-            statusCode = 404;
-        }else{
-            message = "Master Plan Sub fetched successfully";
-            statusCode = 200;
-        }
-        return new ResponseEntity<>(new HttpResponse(statusCode,message,masterPlanDtoList),HttpStatus.OK);
+        return new ResponseEntity<>(masterPlanDtoList,HttpStatus.OK);
     }
 
     @GetMapping(path = "/getMasterPlanByStatus/{centerName}")  //GET MASTER PLAN BY CENTER FILTERED BY STATUS

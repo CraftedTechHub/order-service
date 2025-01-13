@@ -69,7 +69,7 @@ public class OrderDetailsController {
         String message;
         int statusCode;
         if(num != 1){
-            message = "Order details saving is unsuccessful";
+            message = "Model number is already exist, Changes unsaved";
             statusCode = 404;
         }else{
             message = "Order details saved successfully";
@@ -79,18 +79,9 @@ public class OrderDetailsController {
     }
 
     @GetMapping(path = "/getOrderDetails/{orderId}")    //VIEW ORDER
-    public ResponseEntity<HttpResponse> getOrderDetails(@PathVariable(value = "orderId") int orderId){
+    public ResponseEntity<OrderDetailsDto> getOrderDetails(@PathVariable(value = "orderId") int orderId){
         OrderDetailsDto orderDetailsDto2 =orderDetailsService.getOrderDetails(orderId);
-        String message;
-        int statusCode;
-        if(orderDetailsDto2==null){
-            message = "No order details found";
-            statusCode=404;
-        }else{
-            message = "Orders details fetched successfully";
-            statusCode=200;
-        }
-        return new ResponseEntity<>(new HttpResponse(statusCode,message,orderDetailsDto2),HttpStatus.OK);
+        return new ResponseEntity<>(orderDetailsDto2,HttpStatus.OK);
     }
 
     @PutMapping(path = "/updateOrderDetails")   //EDIT EXIST ORDER
@@ -121,5 +112,20 @@ public class OrderDetailsController {
             statusCode=200;
         }
         return new ResponseEntity<>(new HttpResponse(statusCode,message,orderDetailsDto),HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/getOrderDetailsByModelNo/{modelNo}")    //VIEW ORDER BY MODEL NUMBER
+    public ResponseEntity<HttpResponse> getOrderDetails(@PathVariable(value = "modelNo") String modelNo){
+        OrderDetailsDto orderDetailsDto2 =orderDetailsService.getOrderDetailsFromModelNo(modelNo);
+        String message;
+        int statusCode;
+        if(orderDetailsDto2==null){
+            message = "model number not found";
+            statusCode=404;
+        }else{
+            message = "Orders details fetched successfully";
+            statusCode=200;
+        }
+        return new ResponseEntity<>(new HttpResponse(statusCode,message,orderDetailsDto2),HttpStatus.OK);
     }
 }
