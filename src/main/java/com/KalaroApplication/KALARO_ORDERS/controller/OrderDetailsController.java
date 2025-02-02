@@ -15,6 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/orderDetails")
+@CrossOrigin(origins = "http://localhost:5173")
 public class OrderDetailsController {
 
     private String message;
@@ -26,7 +27,7 @@ public class OrderDetailsController {
     @Autowired
     private MasterPlanService masterPlanService;
 
-    @GetMapping(path="/getAllOrderDetails") //GET ALL ORDERS
+    @GetMapping(path="/getAllOrderDetails") //GET ALL ORDERS //USED
     public ResponseEntity<HttpResponse> getAllOrderDetails(){
         List<OrderDetailsDto> orderDetailsDtoList = orderDetailsService.getAllOrderDetails();
         if(orderDetailsDtoList.isEmpty()){
@@ -39,7 +40,7 @@ public class OrderDetailsController {
         return new ResponseEntity<>(new HttpResponse(statusCode,message,orderDetailsDtoList),HttpStatus.OK);
     }
 
-    @GetMapping(path="/getOrderDetailsByCategory/{category}") //FILTER BY CATEGORY
+    @GetMapping(path="/getOrderDetailsByCategory/{category}") //FILTER BY CATEGORY //USED
     public ResponseEntity<HttpResponse> getOrderDetailsByCategory(@PathVariable(value = "category") String category){
         List<OrderDetailsDto> orderDetailsDtoList = orderDetailsService.getOrderDetailsByCategory(category);
         if(orderDetailsDtoList.isEmpty()){
@@ -52,7 +53,7 @@ public class OrderDetailsController {
         return new ResponseEntity<>(new HttpResponse(statusCode,message,orderDetailsDtoList),HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "/deleteOrderDetails/{orderId}")  //DELETE ORDERS
+    @DeleteMapping(path = "/deleteOrderDetails/{orderId}")  //DELETE ORDERS //USED
     public ResponseEntity<StandardResponse> deleteOrderDetails(@PathVariable(value = "orderId") int orderId){
         int num = orderDetailsService.deleteOrderDetails(orderId);
         if(num == 0){
@@ -65,7 +66,7 @@ public class OrderDetailsController {
         return new ResponseEntity<>(new StandardResponse(statusCode,message),HttpStatus.OK);
     }
 
-    @PostMapping(path = "/addNewOrderDetails")  //ADD NEW ORDER
+    @PostMapping(path = "/addNewOrderDetails")  //ADD NEW ORDER //USED
     public ResponseEntity<StandardResponse> addOrderDetails(@RequestBody OrderDetailsDto orderDetailsDto) {
         int num = orderDetailsService.saveOrderDetails(orderDetailsDto);
         if(num != 1){
@@ -78,13 +79,13 @@ public class OrderDetailsController {
         return new ResponseEntity<>(new StandardResponse(statusCode,message),HttpStatus.CREATED);
     }
 
-    @GetMapping(path = "/getOrderDetails/{orderId}")    //VIEW ORDER
+    @GetMapping(path = "/getOrderDetails/{orderId}")    //VIEW ORDER //USED
     public ResponseEntity<OrderDetailsDto> getOrderDetails(@PathVariable(value = "orderId") int orderId){
         OrderDetailsDto orderDetailsDto2 =orderDetailsService.getOrderDetails(orderId);
         return new ResponseEntity<>(orderDetailsDto2,HttpStatus.OK);
     }
 
-    @PutMapping(path = "/updateOrderDetails")   //EDIT EXIST ORDER
+    @PutMapping(path = "/updateOrderDetails")   //EDIT EXIST ORDER //USED
     public ResponseEntity<StandardResponse> updateOrderDetails(@RequestBody OrderDetailsDto orderDetailsDto){
         int num =orderDetailsService.updateOrderDetails(orderDetailsDto);
         if(num != 1){
@@ -126,7 +127,7 @@ public class OrderDetailsController {
 
 
     //BELOW MASTER PLAN
-    @PostMapping(path = "/addOrderDetails")  //ADD NEW ORDER
+    @PostMapping(path = "/addOrderDetails")  //ADD NEW ORDER //USED
     public ResponseEntity<StandardResponse> addOrderForMasterPlan(@RequestBody MasterPlanDto masterPlanDto) {
         int num = masterPlanService.saveOrderDetails(masterPlanDto);
         if(num == 0){
@@ -139,7 +140,7 @@ public class OrderDetailsController {
         return new ResponseEntity<>(new StandardResponse(statusCode,message),HttpStatus.CREATED);
     }
 
-    @GetMapping(path = "/getOrderDetailsForMasterPlan/{orderId}")  //GET ORDER DETAILS //getOrderDetails/{orderId} TO /getOrderDetailsForMasterPlan/{orderId}
+    @GetMapping(path = "/getOrderDetailsForMasterPlan/{orderId}")  //GET ORDER DETAILS //getOrderDetails/{orderId} TO /getOrderDetailsForMasterPlan/{orderId} //USED
     public ResponseEntity<HttpResponse> getOrderDetailsForMaster(@PathVariable(value = "orderId") int orderId) {
         List<MasterPlanDto> masterPlanDtoList = masterPlanService.getOrderDetails(orderId);
         if(masterPlanDtoList.isEmpty()){
@@ -152,7 +153,7 @@ public class OrderDetailsController {
         return new ResponseEntity<>(new HttpResponse(statusCode,message,masterPlanDtoList),HttpStatus.OK);
     }
 
-    @PutMapping(path = "/updateOrderDetailsInMaster")  //UPDATE ORDER DETAILS
+    @PutMapping(path = "/updateOrderDetailsInMaster")  //UPDATE ORDER DETAILS //USED
     public ResponseEntity<StandardResponse> updateOrderInMaster(@RequestBody MasterPlanDto masterPlanDto) {
         int num = masterPlanService.updateOrderDetails(masterPlanDto);
         if(num == 0){
@@ -165,7 +166,7 @@ public class OrderDetailsController {
         return new ResponseEntity<>(new StandardResponse(statusCode,message),HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "/deleteOrderDetailsFromMasterPlan/{planId}")  //DELETE ORDER DETAILS //deleteOrderDetails/{orderId} TO /deleteOrderDetailsForMasterPlan/{orderId}
+    @DeleteMapping(path = "/deleteOrderDetailsFromMasterPlan/{planId}")  //DELETE ORDER DETAILS //deleteOrderDetails/{orderId} TO /deleteOrderDetailsForMasterPlan/{orderId} //USED
     public ResponseEntity<StandardResponse> deleteOrderFromMasterPlan(@PathVariable(value = "planId") int planId) {
         int num = masterPlanService.deleteOrderDetails(planId);
         if(num == 0){
@@ -176,6 +177,19 @@ public class OrderDetailsController {
             statusCode = 200;
         }
         return new ResponseEntity<>(new StandardResponse(statusCode,message),HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/getMasterPlanByPlanId/{planId}")  //GET MASTER PLAN //USED
+    public ResponseEntity<HttpResponse> getMasterPlan(@PathVariable(value = "planId") int planId){
+        MasterPlanDto masterPlanDto = masterPlanService.getMasterPlan(planId);
+        if(masterPlanDto == null){
+            message = "Error occurred while fetching order details of Master Plan";
+            statusCode = 404;
+        }else{
+            message = "Master Plan fetched successfully";
+            statusCode = 200;
+        }
+        return new ResponseEntity<>(new HttpResponse(statusCode,message,masterPlanDto),HttpStatus.OK);
     }
 
     @GetMapping(path = "/getMasterPlanByCenter/{centerName}")  //GET MASTER PLAN BY CENTER
