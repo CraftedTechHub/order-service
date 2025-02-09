@@ -5,7 +5,7 @@ import com.KalaroApplication.KALARO_ORDERS.dto.component.MasterPlanSubDto;
 import com.KalaroApplication.KALARO_ORDERS.entity.MasterPlan;
 import com.KalaroApplication.KALARO_ORDERS.entity.component.MasterPlanSub;
 import com.KalaroApplication.KALARO_ORDERS.repository.MasterPlanRepository;
-import com.KalaroApplication.KALARO_ORDERS.repository.component.MasterPlanSubRepository;
+import com.KalaroApplication.KALARO_ORDERS.repository.MasterPlanSubRepository;
 import com.KalaroApplication.KALARO_ORDERS.service.MasterPlanService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -168,8 +168,7 @@ public class MasterPlanServiceImpl implements MasterPlanService {
 
     @Override
     public List<MasterPlanDto> getMasterPlanSubByCenter(String centerName) {
-        List<MasterPlanSub> masterPlanSubList = (List<MasterPlanSub>) masterPlanSubRepository.findAllByCenter(centerName);
-//        List<Integer> masterPlanSubDtoList = new ArrayList<>();
+        List<MasterPlanSub> masterPlanSubList =  masterPlanSubRepository.findAllByCenter(centerName);
         List<MasterPlanDto> masterPlanDtoList = new ArrayList<>();
         for(MasterPlanSub masterPlanSub:masterPlanSubList){
             if(masterPlanSub.getCenter()==null){
@@ -199,5 +198,63 @@ public class MasterPlanServiceImpl implements MasterPlanService {
         }
         log.info("Master Plan Sub fetched successfully");
         return masterPlanDtoList;
+    }
+
+    @Override
+    public MasterPlanDto getMasterPlan(int planId) {
+        MasterPlan masterPlan = masterPlanRepository.findById(planId)
+                .orElseThrow(() -> new RuntimeException("MasterPlan not found for ID: " + planId));
+
+        MasterPlanDto masterPlanDto = new MasterPlanDto();
+        masterPlanDto.setPlanId(masterPlan.getPlanId());
+        masterPlanDto.setOrderId(masterPlan.getOrderId());
+        masterPlanDto.setColor(masterPlan.getColor());
+        masterPlanDto.setSize(masterPlan.getSize());
+        masterPlanDto.setOrderQuantity(masterPlan.getOrderQuantity());
+        masterPlanDto.setOrderCategory(masterPlan.getOrderCategory());
+
+        List<MasterPlanSubDto> masterPlanSubDtoList = new ArrayList<>();
+        for(MasterPlanSub masterPlanSub:masterPlan.getSubPlans()){
+            MasterPlanSubDto masterPlanSubDto = new MasterPlanSubDto();
+            masterPlanSubDto.setId(masterPlanSub.getId());
+            masterPlanSubDto.setCenter(masterPlanSub.getCenter());
+            masterPlanSubDto.setDate(masterPlanSub.getDate());
+            masterPlanSubDto.setQty(masterPlanSub.getQty());
+            masterPlanSubDtoList.add(masterPlanSubDto);
+        }
+        masterPlanDto.setSubPlans(masterPlanSubDtoList);
+
+        log.info("Master Plan fetched successfully");
+        return masterPlanDto;
+    }
+
+    @Override
+    public MasterPlanDto getMasterPlanDetailsForCenter(int orderId, String centerName) {
+        MasterPlan masterPlan = masterPlanRepository.findAllByOrderId(orderId)
+                .stream()
+                .filter(mp -> mp.getSubPlans().stream().anyMatch(subPlan -> subPlan.getCenter().equals(centerName)))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("MasterPlan not found for Order ID: " + orderId + " and Center: " + centerName));
+        MasterPlanDto masterPlanDto = new MasterPlanDto();
+        masterPlanDto.setPlanId(masterPlan.getPlanId());
+        masterPlanDto.setOrderId(masterPlan.getOrderId());
+        masterPlanDto.setColor(masterPlan.getColor());
+        masterPlanDto.setSize(masterPlan.getSize());
+        masterPlanDto.setOrderQuantity(masterPlan.getOrderQuantity());
+        masterPlanDto.setOrderCategory(masterPlan.getOrderCategory());
+
+        List<MasterPlanSubDto> masterPlanSubDtoList = new ArrayList<>();
+        for(MasterPlanSub masterPlanSub:masterPlan.getSubPlans()){
+            if(masterPlanSub.getCenter().equals(centerName)){
+                MasterPlanSubDto masterPlanSubDto = new MasterPlanSubDto();
+                masterPlanSubDto.setId(masterPlanSub.getId());
+                masterPlanSubDto.setCenter(masterPlanSub.getCenter());
+                masterPlanSubDto.setDate(masterPlanSub.getDate());
+                masterPlanSubDto.setQty(masterPlanSub.getQty());
+                masterPlanSubDtoList.add(masterPlanSubDto);
+            }
+        }
+        masterPlanDto.setSubPlans(masterPlanSubDtoList);
+        return masterPlanDto;
     }
 }

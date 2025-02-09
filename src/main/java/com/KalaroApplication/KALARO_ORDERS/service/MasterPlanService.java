@@ -15,6 +15,9 @@ public interface MasterPlanService {
 
     int deleteOrderDetails(int planId);
 
-    List<MasterPlanDto> getMasterPlanSubByCenter(String centerName);
+    MasterPlanDto getMasterPlan(int planId);
 
+    MasterPlanDto getMasterPlanDetailsForCenter(int orderId, String centerName);
+
+    List<MasterPlanDto> getMasterPlanSubByCenter(String centerName);
 }
