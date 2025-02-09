@@ -16,8 +16,4 @@ public interface OrderDetailsService {
     List<OrderDetailsDto> getAllOrderDetails();
 
     List<OrderDetailsDto> getOrderDetailsByCategory(String category);
-
-    OrderDetailsDto passOrderDetails(int orderId);
-
-    OrderDetailsDto getOrderDetailsFromModelNo(String modelNo);
 }

@@ -15,8 +15,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/order")
-@CrossOrigin(origins = "http://localhost:5173")
-public class OrderDetailsController {
+public class OrderController {
 
     private String message;
     private int statusCode;
@@ -98,34 +97,6 @@ public class OrderDetailsController {
         return new ResponseEntity<>(new StandardResponse(statusCode,message),HttpStatus.OK);
     }
 
-    @GetMapping(path = "/getMasterPlan/{orderId}")    //MASTER PLAN BUTTON
-    public ResponseEntity<HttpResponse> passOrderDetails(@PathVariable(value = "orderId") int orderId){
-        OrderDetailsDto orderDetailsDto =orderDetailsService.passOrderDetails(orderId);
-        if(orderDetailsDto==null){
-            message = "Orders details fetched unsuccessfully";
-            statusCode=404;
-        }else{
-            message = "Orders details fetched successfully";
-            statusCode=200;
-        }
-        return new ResponseEntity<>(new HttpResponse(statusCode,message,orderDetailsDto),HttpStatus.OK);
-    }
-
-    @GetMapping(path = "/getOrderDetailsByModelNo/{modelNo}")    //VIEW ORDER BY MODEL NUMBER
-    public ResponseEntity<HttpResponse> getOrderDetails(@PathVariable(value = "modelNo") String modelNo){
-        OrderDetailsDto orderDetailsDto2 =orderDetailsService.getOrderDetailsFromModelNo(modelNo);
-        if(orderDetailsDto2==null){
-            message = "model number not found";
-            statusCode=404;
-        }else{
-            message = "Orders details fetched successfully";
-            statusCode=200;
-        }
-        return new ResponseEntity<>(new HttpResponse(statusCode,message,orderDetailsDto2),HttpStatus.OK);
-    }
-
-
-
     //BELOW MASTER PLAN
     @PostMapping(path = "/addMasterPlan")  //ADD NEW ORDER //USED
     public ResponseEntity<StandardResponse> addOrderForMasterPlan(@RequestBody MasterPlanDto masterPlanDto) {
@@ -192,22 +163,15 @@ public class OrderDetailsController {
         return new ResponseEntity<>(new HttpResponse(statusCode,message,masterPlanDto),HttpStatus.OK);
     }
 
-    @GetMapping(path = "/getMasterPlanByCenter/{centerName}")  //GET MASTER PLAN BY CENTER
+    @GetMapping(path = "/getMasterPlanByCenter/{centerName}")  //GET MASTER PLAN BY CENTER //USED IN CENTER
     public ResponseEntity<List<MasterPlanDto>> getMasterPlanSubByCenter(@PathVariable String centerName){
         List<MasterPlanDto> masterPlanDtoList = masterPlanService.getMasterPlanSubByCenter(centerName);
         return new ResponseEntity<>(masterPlanDtoList,HttpStatus.OK);
     }
 
-    @GetMapping(path = "/getMasterPlanByStatus/{centerName}")  //GET MASTER PLAN BY CENTER FILTERED BY STATUS
-    public ResponseEntity<HttpResponse> getMasterPlanSubByCenterForFilter(@PathVariable String centerName){
-        List<MasterPlanDto> masterPlanDtoList = masterPlanService.getMasterPlanSubByCenter(centerName);
-        if(masterPlanDtoList.isEmpty()){
-            message = "Error occurred while fetching order sub plan details of Master Plan";
-            statusCode = 404;
-        }else{
-            message = "Master Plan Sub fetched successfully";
-            statusCode = 200;
-        }
-        return new ResponseEntity<>(new HttpResponse(statusCode,message,masterPlanDtoList),HttpStatus.OK);
+    @GetMapping(path = "/getMasterPlanDetailsForCenter/{orderId}/{centerName}") //USED
+    public ResponseEntity<MasterPlanDto> getMasterPlanDetailsForCenter(@PathVariable int orderId, @PathVariable String centerName){
+        MasterPlanDto masterPlanDto = masterPlanService.getMasterPlanDetailsForCenter(orderId, centerName);
+        return new ResponseEntity<>(masterPlanDto,HttpStatus.OK);
     }
 }
