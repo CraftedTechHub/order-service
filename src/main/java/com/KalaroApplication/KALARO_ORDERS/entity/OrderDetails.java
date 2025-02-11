@@ -27,8 +27,9 @@ public class OrderDetails {
     @CollectionTable(name = "order_size_quantity", joinColumns = @JoinColumn(name = "order_id"))
     @Column(name = "size_and_quantity")
     private List<String> sizeAndQuantity;
-
-    @Column(name = "color")
+    @Column(name = "Yarn Weight")
+    private double yarnWeight;
+    @Column(name = "Color")
     private String color;
     @Column(name = "Yarn Imported Date")
     private String yarnImportDate;
