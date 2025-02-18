@@ -201,6 +201,33 @@ public class MasterPlanServiceImpl implements MasterPlanService {
     }
 
     @Override
+    public MasterPlanDto getMasterPlanByPlanId(int planId) {
+        MasterPlan masterPlan = masterPlanRepository.findById(planId)
+                .orElseThrow(() -> new RuntimeException("MasterPlan not found for ID: " + planId));
+        MasterPlanDto masterPlanDto = new MasterPlanDto();
+        masterPlanDto.setPlanId(masterPlan.getPlanId());
+        masterPlanDto.setOrderId(masterPlan.getOrderId());
+        masterPlanDto.setColor(masterPlan.getColor());
+        masterPlanDto.setSize(masterPlan.getSize());
+        masterPlanDto.setOrderQuantity(masterPlan.getOrderQuantity());
+        masterPlanDto.setOrderCategory(masterPlan.getOrderCategory());
+
+        List<MasterPlanSubDto> masterPlanSubDtoList = new ArrayList<>();
+        for(MasterPlanSub masterPlanSub:masterPlan.getSubPlans()){
+                MasterPlanSubDto masterPlanSubDto = new MasterPlanSubDto();
+                masterPlanSubDto.setId(masterPlanSub.getId());
+                masterPlanSubDto.setCenter(masterPlanSub.getCenter());
+                masterPlanSubDto.setDate(masterPlanSub.getDate());
+                masterPlanSubDto.setQty(masterPlanSub.getQty());
+                masterPlanSubDtoList.add(masterPlanSubDto);
+
+        }
+        masterPlanDto.setSubPlans(masterPlanSubDtoList);
+        return masterPlanDto;
+
+    }
+
+    @Override
     public MasterPlanDto getMasterPlan(int planId) {
         MasterPlan masterPlan = masterPlanRepository.findById(planId)
                 .orElseThrow(() -> new RuntimeException("MasterPlan not found for ID: " + planId));
@@ -229,12 +256,12 @@ public class MasterPlanServiceImpl implements MasterPlanService {
     }
 
     @Override
-    public MasterPlanDto getMasterPlanDetailsForCenter(int orderId, String centerName) {
-        MasterPlan masterPlan = masterPlanRepository.findAllByOrderId(orderId)
+    public MasterPlanDto getMasterPlanDetailsForCenter(int planId, String centerName) {
+        MasterPlan masterPlan = masterPlanRepository.findById(planId)
                 .stream()
                 .filter(mp -> mp.getSubPlans().stream().anyMatch(subPlan -> subPlan.getCenter().equals(centerName)))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("MasterPlan not found for Order ID: " + orderId + " and Center: " + centerName));
+                .orElseThrow(() -> new RuntimeException("MasterPlan not found for Order ID: " + planId + " and Center: " + centerName));
         MasterPlanDto masterPlanDto = new MasterPlanDto();
         masterPlanDto.setPlanId(masterPlan.getPlanId());
         masterPlanDto.setOrderId(masterPlan.getOrderId());

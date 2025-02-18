@@ -20,4 +20,6 @@ public interface MasterPlanService {
     MasterPlanDto getMasterPlanDetailsForCenter(int orderId, String centerName);
 
     List<MasterPlanDto> getMasterPlanSubByCenter(String centerName);
+
+    MasterPlanDto getMasterPlanByPlanId(int planId);
 }
