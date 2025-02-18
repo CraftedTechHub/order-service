@@ -1,6 +1,7 @@
 package com.KalaroApplication.KALARO_ORDERS.service;
 
 import com.KalaroApplication.KALARO_ORDERS.dto.OrderDetailsDto;
+import com.KalaroApplication.KALARO_ORDERS.dto.component.EmpOrderDto;
 
 import java.util.List;
 
@@ -16,4 +17,6 @@ public interface OrderDetailsService {
     List<OrderDetailsDto> getAllOrderDetails();
 
     List<OrderDetailsDto> getOrderDetailsByCategory(String category);
+
+    List<EmpOrderDto> getEmpOrders(String modelName);
 }
