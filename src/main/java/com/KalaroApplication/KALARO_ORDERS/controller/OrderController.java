@@ -170,11 +170,17 @@ public class OrderController {
         return new ResponseEntity<>(masterPlanDtoList,HttpStatus.OK);
     }
 
-    @GetMapping(path = "/getMasterPlanDetailsForCenter/{orderId}/{centerName}") //USED
-    public ResponseEntity<MasterPlanDto> getMasterPlanDetailsForCenter(@PathVariable int orderId, @PathVariable String centerName){
-        MasterPlanDto masterPlanDto = masterPlanService.getMasterPlanDetailsForCenter(orderId, centerName);
+    @GetMapping(path = "/getMasterPlanDetailsForCenter/{planId}/{centerName}") //USED
+    public ResponseEntity<MasterPlanDto> getMasterPlanDetailsForCenter(@PathVariable int planId, @PathVariable String centerName){
+        MasterPlanDto masterPlanDto = masterPlanService.getMasterPlanDetailsForCenter(planId, centerName);
         return new ResponseEntity<>(masterPlanDto,HttpStatus.OK);
     }
+
+//    @GetMapping(path="/getMasterPlanByPlanId/{planId}")
+//    public ResponseEntity<MasterPlanDto> getMasterPlanDetailsByPlanId(@PathVariable int planId){
+//        MasterPlanDto masterPlanDto = masterPlanService.getMasterPlanByPlanId(planId);
+//        return new ResponseEntity<>(masterPlanDto,HttpStatus.OK);
+//    }
 
     @GetMapping(path = "/getOrderDetailsForEmp/{modelName}") //USED IN EMPLOYEE SERVICE
     public ResponseEntity<List<EmpOrderDto>> getEmpOrders(@PathVariable String modelName){
