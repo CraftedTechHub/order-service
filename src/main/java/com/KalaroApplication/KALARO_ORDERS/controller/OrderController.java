@@ -2,6 +2,7 @@ package com.KalaroApplication.KALARO_ORDERS.controller;
 
 import com.KalaroApplication.KALARO_ORDERS.dto.MasterPlanDto;
 import com.KalaroApplication.KALARO_ORDERS.dto.OrderDetailsDto;
+import com.KalaroApplication.KALARO_ORDERS.dto.component.EmpOrderDto;
 import com.KalaroApplication.KALARO_ORDERS.service.MasterPlanService;
 import com.KalaroApplication.KALARO_ORDERS.service.OrderDetailsService;
 import com.KalaroApplication.KALARO_ORDERS.utility.HttpResponse;
@@ -173,5 +174,11 @@ public class OrderController {
     public ResponseEntity<MasterPlanDto> getMasterPlanDetailsForCenter(@PathVariable int orderId, @PathVariable String centerName){
         MasterPlanDto masterPlanDto = masterPlanService.getMasterPlanDetailsForCenter(orderId, centerName);
         return new ResponseEntity<>(masterPlanDto,HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/getOrderDetailsForEmp/{modelName}") //USED IN EMPLOYEE SERVICE
+    public ResponseEntity<List<EmpOrderDto>> getEmpOrders(@PathVariable String modelName){
+        List<EmpOrderDto> empOrderDtoList = orderDetailsService.getEmpOrders(modelName);
+        return new ResponseEntity<>(empOrderDtoList,HttpStatus.OK);
     }
 }

@@ -1,6 +1,7 @@
 package com.KalaroApplication.KALARO_ORDERS.service.impl;
 
 import com.KalaroApplication.KALARO_ORDERS.dto.OrderDetailsDto;
+import com.KalaroApplication.KALARO_ORDERS.dto.component.EmpOrderDto;
 import com.KalaroApplication.KALARO_ORDERS.entity.OrderDetails;
 import com.KalaroApplication.KALARO_ORDERS.repository.OrderDetailsRepository;
 import com.KalaroApplication.KALARO_ORDERS.service.OrderDetailsService;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -218,4 +220,26 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
             throw new RuntimeException("Failed to fetch order details by category. Please try again later.");
         }
     }
+
+    @Override
+    public List<EmpOrderDto> getEmpOrders(String modelName) {
+        List<OrderDetails> orderDetailsList = orderDetailsRepository.findAllByModelNameContaining(modelName);
+        List<EmpOrderDto> empOrderDtoList = new ArrayList<>();
+
+        for (OrderDetails orderDetails : orderDetailsList) {
+            EmpOrderDto empOrderDto = new EmpOrderDto();
+            empOrderDto.setModelName(orderDetails.getModelName());
+
+            // Extracting only the size from "Size:Quantity" format
+            List<String> sizes = orderDetails.getSizeAndQuantity()
+                    .stream()
+                    .map(sizeQty -> sizeQty.split(":")[0]) // Extract size part
+                    .collect(Collectors.toList());
+
+            empOrderDto.setSizes(sizes);
+            empOrderDtoList.add(empOrderDto);
+        }
+        return empOrderDtoList;
+    }
+
 }
