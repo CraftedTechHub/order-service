@@ -3,9 +3,11 @@ package com.KalaroApplication.KALARO_ORDERS.service.impl;
 import com.KalaroApplication.KALARO_ORDERS.dto.MasterPlanDto;
 import com.KalaroApplication.KALARO_ORDERS.dto.component.MasterPlanSubDto;
 import com.KalaroApplication.KALARO_ORDERS.entity.MasterPlan;
+import com.KalaroApplication.KALARO_ORDERS.entity.OrderDetails;
 import com.KalaroApplication.KALARO_ORDERS.entity.component.MasterPlanSub;
 import com.KalaroApplication.KALARO_ORDERS.repository.MasterPlanRepository;
 import com.KalaroApplication.KALARO_ORDERS.repository.MasterPlanSubRepository;
+import com.KalaroApplication.KALARO_ORDERS.repository.OrderDetailsRepository;
 import com.KalaroApplication.KALARO_ORDERS.service.MasterPlanService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,9 @@ public class MasterPlanServiceImpl implements MasterPlanService {
 
     @Autowired
     private MasterPlanSubRepository masterPlanSubRepository;
+
+    @Autowired
+    private OrderDetailsRepository orderDetailsRepository;
 
     @Override
     public int saveOrderDetails(MasterPlanDto masterPlanDto) {
@@ -177,13 +182,16 @@ public class MasterPlanServiceImpl implements MasterPlanService {
                 MasterPlan masterPlan = masterPlanRepository.findById(masterPlanSub.getMasterPlan().getPlanId())
                         .orElseThrow(() -> new RuntimeException("MasterPlan not found for ID: " + masterPlanSub.getMasterPlan().getPlanId()));
 
+                OrderDetails orderDetails = orderDetailsRepository.findById(masterPlan.getOrderId())
+                        .orElseThrow(() -> new RuntimeException("OrderDetails not found for ID: " + masterPlan.getOrderId()));
+
                 MasterPlanDto masterPlanDto = new MasterPlanDto();
                 masterPlanDto.setPlanId(masterPlan.getPlanId());
                 masterPlanDto.setOrderId(masterPlan.getOrderId());
                 masterPlanDto.setColor(masterPlan.getColor());
                 masterPlanDto.setSize(masterPlan.getSize());
                 masterPlanDto.setOrderQuantity(masterPlan.getOrderQuantity());
-                masterPlanDto.setOrderCategory(masterPlan.getOrderCategory());
+                masterPlanDto.setOrderCategory(orderDetails.getOrderCategory());
 
                 MasterPlanSubDto masterPlanSubDto = new MasterPlanSubDto();
                 masterPlanSubDto.setId(masterPlanSub.getId());
