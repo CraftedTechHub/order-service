@@ -18,5 +18,5 @@ public interface OrderDetailsRepository extends JpaRepository<OrderDetails, Inte
 
     List<OrderDetails> findAllByOrderIdNot(int orderId);
 
-    List<OrderDetails> findAllByModelNameContaining(String modelName);
+    List<OrderDetails> findAllByModelNameContainingIgnoreCase(String modelName);
 }
