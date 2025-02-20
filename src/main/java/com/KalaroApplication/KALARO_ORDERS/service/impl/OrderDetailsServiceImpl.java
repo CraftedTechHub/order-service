@@ -223,7 +223,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
 
     @Override
     public List<EmpOrderDto> getEmpOrders(String modelName) {
-        List<OrderDetails> orderDetailsList = orderDetailsRepository.findAllByModelNameContaining(modelName);
+        List<OrderDetails> orderDetailsList = orderDetailsRepository.findAllByModelNameContainingIgnoreCase(modelName);
         List<EmpOrderDto> empOrderDtoList = new ArrayList<>();
 
         for (OrderDetails orderDetails : orderDetailsList) {
