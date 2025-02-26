@@ -34,6 +34,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                     order.getCustomerName(),
                     order.getSizeAndQuantity(),
                     order.getYarnWeight(),
+                    order.getOrderWeight(),
                     order.getColor(),
                     order.getYarnImportDate(),
                     order.getCenterSampleApprovedDate(),
@@ -66,6 +67,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                         orderDetails.getCustomerName(),
                         orderDetails.getSizeAndQuantity(),
                         orderDetails.getYarnWeight(),
+                        orderDetails.getOrderWeight(),
                         orderDetails.getColor(),
                         orderDetails.getYarnImportDate(),
                         orderDetails.getCenterSampleApprovedDate(),
@@ -105,6 +107,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                 orderDetails.setYarnType(order.getYarnType());
                 orderDetails.setSizeAndQuantity(order.getSizeAndQuantity());
                 orderDetails.setYarnWeight(order.getYarnWeight());
+                orderDetails.setOrderWeight(order.getOrderWeight());
                 orderDetails.setColor(order.getColor());
                 orderDetails.setYarnImportDate(order.getYarnImportDate());
                 orderDetails.setCenterSampleApprovedDate(order.getCenterSampleApprovedDate());
@@ -162,6 +165,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                             orderDetails.getCustomerName(),
                             orderDetails.getSizeAndQuantity(),
                             orderDetails.getYarnWeight(),
+                            orderDetails.getOrderWeight(),
                             orderDetails.getColor(),
                             orderDetails.getYarnImportDate(),
                             orderDetails.getCenterSampleApprovedDate(),
@@ -201,6 +205,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                             orderDetails.getCustomerName(),
                             orderDetails.getSizeAndQuantity(),
                             orderDetails.getYarnWeight(),
+                            orderDetails.getOrderWeight(),
                             orderDetails.getColor(),
                             orderDetails.getYarnImportDate(),
                             orderDetails.getCenterSampleApprovedDate(),

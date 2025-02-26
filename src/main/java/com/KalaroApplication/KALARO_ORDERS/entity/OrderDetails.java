@@ -29,6 +29,8 @@ public class OrderDetails {
     private List<String> sizeAndQuantity;
     @Column(name = "Yarn Weight")
     private double yarnWeight;
+    @Column(name = "Order Weight")
+    private double orderWeight;
     @Column(name = "Color")
     private String color;
     @Column(name = "Yarn Imported Date")
