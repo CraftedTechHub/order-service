@@ -20,6 +20,7 @@ public class OrderDetailsDto {
     private double yarnWeight;
     private double orderWeight;
     private String color;
+    private String imageUrl;
     private String yarnImportDate;
     private String centerSampleApprovedDate;
     private String yarnDistributionDate;

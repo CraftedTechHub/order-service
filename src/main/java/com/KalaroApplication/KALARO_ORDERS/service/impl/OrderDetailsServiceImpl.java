@@ -8,7 +8,9 @@ import com.KalaroApplication.KALARO_ORDERS.service.OrderDetailsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,36 +21,48 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
     @Autowired
     private OrderDetailsRepository orderDetailsRepository;
 
+    @Autowired
+    private S3Service s3Service;
+
     @Override
-    public int saveOrderDetails(OrderDetailsDto order) {
-        OrderDetails orderDetailsList = orderDetailsRepository.findByModelNo(order.getModelNo());
-        if(orderDetailsList!=null){
-            log.error("Could not saved order details, you entered model number is exist");
+    public int saveOrderDetails(OrderDetailsDto order, MultipartFile modelImage) throws IOException {
+
+        OrderDetails existingOrder = orderDetailsRepository.findByModelNo(order.getModelNo());
+        if (existingOrder != null) {
+            log.error("Order details could not be saved, model number already exists: {}", order.getModelNo());
             return 0;
-        }else {
-            OrderDetails orderDetails = new OrderDetails(
-                    order.getOrderId(),
-                    order.getModelNo(),
-                    order.getModelName(),
-                    order.getYarnType(),
-                    order.getCustomerName(),
-                    order.getSizeAndQuantity(),
-                    order.getYarnWeight(),
-                    order.getOrderWeight(),
-                    order.getColor(),
-                    order.getYarnImportDate(),
-                    order.getCenterSampleApprovedDate(),
-                    order.getYarnDistributionDate(),
-                    order.getOrderCompletionDate(),
-                    order.getDescription(),
-                    order.getNote(),
-                    order.getOrderCategory()
-            );
-            orderDetailsRepository.save(orderDetails);
-            log.info("Order details saved successfully");
-            return 1;
         }
+
+        String modelImageUrl = null;
+        if (modelImage != null && !modelImage.isEmpty()) {
+            modelImageUrl = s3Service.uploadModelImage(modelImage, order.getModelNo());
+        }
+
+        OrderDetails orderDetails = new OrderDetails(
+                order.getOrderId(),
+                order.getModelNo(),
+                order.getModelName(),
+                order.getYarnType(),
+                order.getCustomerName(),
+                order.getSizeAndQuantity(),
+                order.getYarnWeight(),
+                order.getOrderWeight(),
+                order.getColor(),
+                modelImageUrl,
+                order.getYarnImportDate(),
+                order.getCenterSampleApprovedDate(),
+                order.getYarnDistributionDate(),
+                order.getOrderCompletionDate(),
+                order.getDescription(),
+                order.getNote(),
+                order.getOrderCategory()
+        );
+
+        orderDetailsRepository.save(orderDetails);
+        log.info("Order details saved successfully for Model No: {}", order.getModelNo());
+        return 1;
     }
+
 
     @Override
     public OrderDetailsDto getOrderDetails(int orderId) {
@@ -69,6 +83,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                         orderDetails.getYarnWeight(),
                         orderDetails.getOrderWeight(),
                         orderDetails.getColor(),
+                        orderDetails.getImageUrl(),
                         orderDetails.getYarnImportDate(),
                         orderDetails.getCenterSampleApprovedDate(),
                         orderDetails.getYarnDistributionDate(),
@@ -109,6 +124,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                 orderDetails.setYarnWeight(order.getYarnWeight());
                 orderDetails.setOrderWeight(order.getOrderWeight());
                 orderDetails.setColor(order.getColor());
+                orderDetails.setImageUrl(order.getImageUrl());
                 orderDetails.setYarnImportDate(order.getYarnImportDate());
                 orderDetails.setCenterSampleApprovedDate(order.getCenterSampleApprovedDate());
                 orderDetails.setYarnDistributionDate(order.getYarnDistributionDate());
@@ -167,6 +183,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                             orderDetails.getYarnWeight(),
                             orderDetails.getOrderWeight(),
                             orderDetails.getColor(),
+                            orderDetails.getImageUrl(),
                             orderDetails.getYarnImportDate(),
                             orderDetails.getCenterSampleApprovedDate(),
                             orderDetails.getYarnDistributionDate(),
@@ -207,6 +224,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                             orderDetails.getYarnWeight(),
                             orderDetails.getOrderWeight(),
                             orderDetails.getColor(),
+                            orderDetails.getImageUrl(),
                             orderDetails.getYarnImportDate(),
                             orderDetails.getCenterSampleApprovedDate(),
                             orderDetails.getYarnDistributionDate(),
