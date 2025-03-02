@@ -33,6 +33,8 @@ public class OrderDetails {
     private double orderWeight;
     @Column(name = "Color")
     private String color;
+    @Column(name = "image url")
+    private String imageUrl;
     @Column(name = "Yarn Imported Date")
     private String yarnImportDate;
     @Column(name = "Center Sample Approved Date")

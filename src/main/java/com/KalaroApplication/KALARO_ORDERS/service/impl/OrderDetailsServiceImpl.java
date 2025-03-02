@@ -2,13 +2,19 @@ package com.KalaroApplication.KALARO_ORDERS.service.impl;
 
 import com.KalaroApplication.KALARO_ORDERS.dto.OrderDetailsDto;
 import com.KalaroApplication.KALARO_ORDERS.dto.component.EmpOrderDto;
+import com.KalaroApplication.KALARO_ORDERS.entity.MasterPlan;
 import com.KalaroApplication.KALARO_ORDERS.entity.OrderDetails;
+import com.KalaroApplication.KALARO_ORDERS.entity.component.MasterPlanSub;
+import com.KalaroApplication.KALARO_ORDERS.repository.MasterPlanRepository;
+import com.KalaroApplication.KALARO_ORDERS.repository.MasterPlanSubRepository;
 import com.KalaroApplication.KALARO_ORDERS.repository.OrderDetailsRepository;
 import com.KalaroApplication.KALARO_ORDERS.service.OrderDetailsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,36 +25,54 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
     @Autowired
     private OrderDetailsRepository orderDetailsRepository;
 
+    @Autowired
+    private MasterPlanRepository masterPlanRepository;
+
+    @Autowired
+    private MasterPlanSubRepository masterPlanSubRepository;
+
+    @Autowired
+    private S3Service s3Service;
+
     @Override
-    public int saveOrderDetails(OrderDetailsDto order) {
-        OrderDetails orderDetailsList = orderDetailsRepository.findByModelNo(order.getModelNo());
-        if(orderDetailsList!=null){
-            log.error("Could not saved order details, you entered model number is exist");
+    public int saveOrderDetails(OrderDetailsDto order, MultipartFile modelImage) throws IOException {
+
+        OrderDetails existingOrder = orderDetailsRepository.findByModelNo(order.getModelNo());
+        if (existingOrder != null) {
+            log.error("Order details could not be saved, model number already exists: {}", order.getModelNo());
             return 0;
-        }else {
-            OrderDetails orderDetails = new OrderDetails(
-                    order.getOrderId(),
-                    order.getModelNo(),
-                    order.getModelName(),
-                    order.getYarnType(),
-                    order.getCustomerName(),
-                    order.getSizeAndQuantity(),
-                    order.getYarnWeight(),
-                    order.getOrderWeight(),
-                    order.getColor(),
-                    order.getYarnImportDate(),
-                    order.getCenterSampleApprovedDate(),
-                    order.getYarnDistributionDate(),
-                    order.getOrderCompletionDate(),
-                    order.getDescription(),
-                    order.getNote(),
-                    order.getOrderCategory()
-            );
-            orderDetailsRepository.save(orderDetails);
-            log.info("Order details saved successfully");
-            return 1;
         }
+
+        String modelImageUrl = null;
+        if (modelImage != null && !modelImage.isEmpty()) {
+            modelImageUrl = s3Service.uploadModelImage(modelImage, order.getModelNo());
+        }
+
+        OrderDetails orderDetails = new OrderDetails(
+                order.getOrderId(),
+                order.getModelNo(),
+                order.getModelName(),
+                order.getYarnType(),
+                order.getCustomerName(),
+                order.getSizeAndQuantity(),
+                order.getYarnWeight(),
+                order.getOrderWeight(),
+                order.getColor(),
+                modelImageUrl,
+                order.getYarnImportDate(),
+                order.getCenterSampleApprovedDate(),
+                order.getYarnDistributionDate(),
+                order.getOrderCompletionDate(),
+                order.getDescription(),
+                order.getNote(),
+                order.getOrderCategory()
+        );
+
+        orderDetailsRepository.save(orderDetails);
+        log.info("Order details saved successfully for Model No: {}", order.getModelNo());
+        return 1;
     }
+
 
     @Override
     public OrderDetailsDto getOrderDetails(int orderId) {
@@ -69,6 +93,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                         orderDetails.getYarnWeight(),
                         orderDetails.getOrderWeight(),
                         orderDetails.getColor(),
+                        orderDetails.getImageUrl(),
                         orderDetails.getYarnImportDate(),
                         orderDetails.getCenterSampleApprovedDate(),
                         orderDetails.getYarnDistributionDate(),
@@ -87,21 +112,39 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
     }
 
     @Override
-    public int updateOrderDetails(OrderDetailsDto order) {
-        try{
+    public int updateOrderDetails(OrderDetailsDto order, MultipartFile modelImage) {
+        try {
             OrderDetails orderDetails = orderDetailsRepository.findByOrderId(order.getOrderId());
-            List<OrderDetails> orderDetailsList = orderDetailsRepository.findAllByOrderIdNot(order.getOrderId());
-            boolean state = false;
-            for(OrderDetails orderDetails1 : orderDetailsList){
-                if(orderDetails1.getModelNo().equals( order.getModelNo())){
-                    state = true;
-                    break;
-                }
-            }
-            if(state) {
-                log.error("Model number is already exist, Changes unsaved");
+
+            if (orderDetails == null) {
+                log.error("Order not found with ID: {}", order.getOrderId());
                 return 0;
-            }else{
+            }
+
+            List<OrderDetails> orderDetailsList = orderDetailsRepository.findAllByOrderIdNot(order.getOrderId());
+            String previousImgUrl = order.getImageUrl();
+            boolean state = orderDetailsList.stream()
+                    .anyMatch(existingOrder -> existingOrder.getModelNo().equals(order.getModelNo()));
+
+            if (state) {
+                log.error("Model number already exists, changes unsaved");
+                return 0;
+            } else {
+                String newModelImageUrl = previousImgUrl;
+
+                if (modelImage != null && !modelImage.isEmpty()) {
+                    try {
+                        if (previousImgUrl != null && previousImgUrl.contains("/")) {
+                            String previousFileName = previousImgUrl.substring(previousImgUrl.lastIndexOf("/") + 1);
+                            s3Service.deleteModelImage(previousFileName);
+                        }
+                        newModelImageUrl = s3Service.uploadModelImage(modelImage, order.getModelNo());
+                    } catch (Exception e) {
+                        log.error("Error handling model image: {}", e.getMessage());
+                        throw new RuntimeException("Failed to update model image.");
+                    }
+                }
+
                 orderDetails.setModelNo(order.getModelNo());
                 orderDetails.setModelName(order.getModelName());
                 orderDetails.setYarnType(order.getYarnType());
@@ -109,6 +152,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                 orderDetails.setYarnWeight(order.getYarnWeight());
                 orderDetails.setOrderWeight(order.getOrderWeight());
                 orderDetails.setColor(order.getColor());
+                orderDetails.setImageUrl(newModelImageUrl);
                 orderDetails.setYarnImportDate(order.getYarnImportDate());
                 orderDetails.setCenterSampleApprovedDate(order.getCenterSampleApprovedDate());
                 orderDetails.setYarnDistributionDate(order.getYarnDistributionDate());
@@ -118,32 +162,49 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                 orderDetails.setOrderCategory(order.getOrderCategory());
 
                 orderDetailsRepository.save(orderDetails);
-                log.info("Order details updated successfully");
+                log.info("Order details updated successfully for ID: {}", order.getOrderId());
                 return 1;
             }
         } catch (Exception e) {
-            log.error("Error occurred while updating order details: {}", e.getMessage());
+            log.error("Error occurred while updating order details: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to update order details. Please try again later.");
         }
     }
 
     @Override
     public int deleteOrderDetails(int orderId) {
-        try{
-            if(orderDetailsRepository.findByOrderId(orderId) == null){
-                log.error("Order details not found");
+        try {
+            OrderDetails orderDetails = orderDetailsRepository.findByOrderId(orderId);
+
+            if (orderDetails == null) {
+                log.error("Order details not found for ID: {}", orderId);
                 return 0;
-            }else{
-                OrderDetails orderDetails = orderDetailsRepository.findByOrderId(orderId);
-                orderDetailsRepository.delete(orderDetails);
-                log.info("Order details deleted successfully");
-                return 1;
             }
+
+            List<MasterPlan> masterPlanList = masterPlanRepository.findAllByOrderId(orderId);
+            if (!masterPlanList.isEmpty()) {
+                masterPlanRepository.deleteAll(masterPlanList);
+            }
+
+            String imageUrl = orderDetails.getImageUrl();
+            if (imageUrl != null && imageUrl.contains("/")) {
+                try {
+                    String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+                    s3Service.deleteModelImage(fileName);
+                } catch (Exception e) {
+                    log.error("Failed to delete model image for Order ID {}: {}", orderId, e.getMessage());
+                    throw new RuntimeException("Failed to delete associated image.");
+                }
+            }
+
+            orderDetailsRepository.delete(orderDetails);
+            log.info("Order details deleted successfully for ID: {}", orderId);
+            return 1;
+
         } catch (Exception e) {
-            log.error("Error occurred while deleting order details: {}", e.getMessage());
+            log.error("Error occurred while deleting order details for ID {}: {}", orderId, e.getMessage(), e);
             throw new RuntimeException("Failed to delete order details. Please try again later.");
         }
-
     }
 
     @Override
@@ -167,6 +228,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                             orderDetails.getYarnWeight(),
                             orderDetails.getOrderWeight(),
                             orderDetails.getColor(),
+                            orderDetails.getImageUrl(),
                             orderDetails.getYarnImportDate(),
                             orderDetails.getCenterSampleApprovedDate(),
                             orderDetails.getYarnDistributionDate(),
@@ -207,6 +269,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                             orderDetails.getYarnWeight(),
                             orderDetails.getOrderWeight(),
                             orderDetails.getColor(),
+                            orderDetails.getImageUrl(),
                             orderDetails.getYarnImportDate(),
                             orderDetails.getCenterSampleApprovedDate(),
                             orderDetails.getYarnDistributionDate(),

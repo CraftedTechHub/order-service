@@ -7,11 +7,17 @@ import com.KalaroApplication.KALARO_ORDERS.service.MasterPlanService;
 import com.KalaroApplication.KALARO_ORDERS.service.OrderDetailsService;
 import com.KalaroApplication.KALARO_ORDERS.utility.HttpResponse;
 import com.KalaroApplication.KALARO_ORDERS.utility.StandardResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -66,18 +72,33 @@ public class OrderController {
         return new ResponseEntity<>(new StandardResponse(statusCode,message),HttpStatus.OK);
     }
 
-    @PostMapping(path = "/addOrder")  //ADD NEW ORDER //USED
-    public ResponseEntity<StandardResponse> addOrderDetails(@RequestBody OrderDetailsDto orderDetailsDto) {
-        int num = orderDetailsService.saveOrderDetails(orderDetailsDto);
-        if(num != 1){
-            message = "Model number is already exist, Changes unsaved";
-            statusCode = 404;
-        }else{
-            message = "Order details saved successfully";
-            statusCode = 201;
+    @PostMapping(value = "/addOrder", consumes = MediaType.MULTIPART_FORM_DATA_VALUE) //ADD NEW ORDER //USED
+    public ResponseEntity<StandardResponse> addOrderDetails(
+            @RequestPart("orderDetails") String orderDetails,
+            @RequestPart(value = "modelImage", required = false) MultipartFile modelImage) {
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            OrderDetailsDto orderDetailsDto = objectMapper.readValue(orderDetails, OrderDetailsDto.class);
+
+            int num = orderDetailsService.saveOrderDetails(orderDetailsDto, modelImage);
+
+            String message;
+            int statusCode;
+            if (num != 1) {
+                message = "Model number already exists, changes unsaved";
+                statusCode = 404;
+            } else {
+                message = "Order details saved successfully";
+                statusCode = 201;
+            }
+
+            return new ResponseEntity<>(new StandardResponse(statusCode, message), HttpStatus.CREATED);
+        } catch (IOException e) {
+            return new ResponseEntity<>(new StandardResponse(400, "Failed to process order data"), HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(new StandardResponse(statusCode,message),HttpStatus.CREATED);
     }
+
 
     @GetMapping(path = "/getOrderDetails/{orderId}")    //VIEW ORDER //USED
     public ResponseEntity<OrderDetailsDto> getOrderDetails(@PathVariable(value = "orderId") int orderId){
@@ -85,18 +106,33 @@ public class OrderController {
         return new ResponseEntity<>(orderDetailsDto2,HttpStatus.OK);
     }
 
-    @PutMapping(path = "/updateOrderDetails")   //EDIT EXIST ORDER //USED
-    public ResponseEntity<StandardResponse> updateOrderDetails(@RequestBody OrderDetailsDto orderDetailsDto){
-        int num =orderDetailsService.updateOrderDetails(orderDetailsDto);
-        if(num != 1){
-            message = "Model number is already exist, Changes unsaved";
-            statusCode=404;
-        }else{
-            message = "Orders details fetched successfully";
-            statusCode=200;
+    @PutMapping(value = "/updateOrderDetails", consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // EDIT EXISTING ORDER // USED
+    public ResponseEntity<StandardResponse> updateOrderDetails(
+            @RequestPart("orderDetails") String orderDetails,
+            @RequestPart(value = "modelImage", required = false) MultipartFile modelImage) {
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            OrderDetailsDto orderDetailsDto = objectMapper.readValue(orderDetails, OrderDetailsDto.class);
+
+            int num = orderDetailsService.updateOrderDetails(orderDetailsDto, modelImage);
+
+            String message;
+            int statusCode;
+            if (num != 1) {
+                message = "Model number already exists, changes unsaved";
+                statusCode = 404;
+            } else {
+                message = "Order details updated successfully";
+                statusCode = 200;
+            }
+
+            return new ResponseEntity<>(new StandardResponse(statusCode, message), HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>(new StandardResponse(400, "Failed to process order data"), HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(new StandardResponse(statusCode,message),HttpStatus.OK);
     }
+
 
     //BELOW MASTER PLAN
     @PostMapping(path = "/addMasterPlan")  //ADD NEW ORDER //USED
