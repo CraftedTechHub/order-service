@@ -2,7 +2,11 @@ package com.KalaroApplication.KALARO_ORDERS.service.impl;
 
 import com.KalaroApplication.KALARO_ORDERS.dto.OrderDetailsDto;
 import com.KalaroApplication.KALARO_ORDERS.dto.component.EmpOrderDto;
+import com.KalaroApplication.KALARO_ORDERS.entity.MasterPlan;
 import com.KalaroApplication.KALARO_ORDERS.entity.OrderDetails;
+import com.KalaroApplication.KALARO_ORDERS.entity.component.MasterPlanSub;
+import com.KalaroApplication.KALARO_ORDERS.repository.MasterPlanRepository;
+import com.KalaroApplication.KALARO_ORDERS.repository.MasterPlanSubRepository;
 import com.KalaroApplication.KALARO_ORDERS.repository.OrderDetailsRepository;
 import com.KalaroApplication.KALARO_ORDERS.service.OrderDetailsService;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +24,12 @@ import java.util.stream.Collectors;
 public class OrderDetailsServiceImpl implements OrderDetailsService {
     @Autowired
     private OrderDetailsRepository orderDetailsRepository;
+
+    @Autowired
+    private MasterPlanRepository masterPlanRepository;
+
+    @Autowired
+    private MasterPlanSubRepository masterPlanSubRepository;
 
     @Autowired
     private S3Service s3Service;
@@ -169,6 +179,11 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
             if (orderDetails == null) {
                 log.error("Order details not found for ID: {}", orderId);
                 return 0;
+            }
+
+            List<MasterPlan> masterPlanList = masterPlanRepository.findAllByOrderId(orderId);
+            if (!masterPlanList.isEmpty()) {
+                masterPlanRepository.deleteAll(masterPlanList);
             }
 
             String imageUrl = orderDetails.getImageUrl();
