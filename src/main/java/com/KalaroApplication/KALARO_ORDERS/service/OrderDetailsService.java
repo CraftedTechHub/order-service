@@ -12,7 +12,7 @@ public interface OrderDetailsService {
 
     OrderDetailsDto getOrderDetails(int orderId);
 
-    int updateOrderDetails(OrderDetailsDto order);
+    int updateOrderDetails(OrderDetailsDto order, MultipartFile modelImage);
 
     int deleteOrderDetails(int orderId);
 

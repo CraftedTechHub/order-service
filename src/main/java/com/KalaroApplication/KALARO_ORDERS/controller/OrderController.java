@@ -106,18 +106,33 @@ public class OrderController {
         return new ResponseEntity<>(orderDetailsDto2,HttpStatus.OK);
     }
 
-    @PutMapping(path = "/updateOrderDetails")   //EDIT EXIST ORDER //USED
-    public ResponseEntity<StandardResponse> updateOrderDetails(@RequestBody OrderDetailsDto orderDetailsDto){
-        int num =orderDetailsService.updateOrderDetails(orderDetailsDto);
-        if(num != 1){
-            message = "Model number is already exist, Changes unsaved";
-            statusCode=404;
-        }else{
-            message = "Orders details fetched successfully";
-            statusCode=200;
+    @PutMapping(value = "/updateOrderDetails", consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // EDIT EXISTING ORDER // USED
+    public ResponseEntity<StandardResponse> updateOrderDetails(
+            @RequestPart("orderDetails") String orderDetails,
+            @RequestPart(value = "modelImage", required = false) MultipartFile modelImage) {
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            OrderDetailsDto orderDetailsDto = objectMapper.readValue(orderDetails, OrderDetailsDto.class);
+
+            int num = orderDetailsService.updateOrderDetails(orderDetailsDto, modelImage);
+
+            String message;
+            int statusCode;
+            if (num != 1) {
+                message = "Model number already exists, changes unsaved";
+                statusCode = 404;
+            } else {
+                message = "Order details updated successfully";
+                statusCode = 200;
+            }
+
+            return new ResponseEntity<>(new StandardResponse(statusCode, message), HttpStatus.OK);
+        } catch (IOException e) {
+            return new ResponseEntity<>(new StandardResponse(400, "Failed to process order data"), HttpStatus.BAD_REQUEST);
         }
-        return new ResponseEntity<>(new StandardResponse(statusCode,message),HttpStatus.OK);
     }
+
 
     //BELOW MASTER PLAN
     @PostMapping(path = "/addMasterPlan")  //ADD NEW ORDER //USED

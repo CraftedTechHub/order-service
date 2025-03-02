@@ -102,21 +102,39 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
     }
 
     @Override
-    public int updateOrderDetails(OrderDetailsDto order) {
-        try{
+    public int updateOrderDetails(OrderDetailsDto order, MultipartFile modelImage) {
+        try {
             OrderDetails orderDetails = orderDetailsRepository.findByOrderId(order.getOrderId());
-            List<OrderDetails> orderDetailsList = orderDetailsRepository.findAllByOrderIdNot(order.getOrderId());
-            boolean state = false;
-            for(OrderDetails orderDetails1 : orderDetailsList){
-                if(orderDetails1.getModelNo().equals( order.getModelNo())){
-                    state = true;
-                    break;
-                }
-            }
-            if(state) {
-                log.error("Model number is already exist, Changes unsaved");
+
+            if (orderDetails == null) {
+                log.error("Order not found with ID: {}", order.getOrderId());
                 return 0;
-            }else{
+            }
+
+            List<OrderDetails> orderDetailsList = orderDetailsRepository.findAllByOrderIdNot(order.getOrderId());
+            String previousImgUrl = order.getImageUrl();
+            boolean state = orderDetailsList.stream()
+                    .anyMatch(existingOrder -> existingOrder.getModelNo().equals(order.getModelNo()));
+
+            if (state) {
+                log.error("Model number already exists, changes unsaved");
+                return 0;
+            } else {
+                String newModelImageUrl = previousImgUrl;
+
+                if (modelImage != null && !modelImage.isEmpty()) {
+                    try {
+                        if (previousImgUrl != null && previousImgUrl.contains("/")) {
+                            String previousFileName = previousImgUrl.substring(previousImgUrl.lastIndexOf("/") + 1);
+                            s3Service.deleteModelImage(previousFileName);
+                        }
+                        newModelImageUrl = s3Service.uploadModelImage(modelImage, order.getModelNo());
+                    } catch (Exception e) {
+                        log.error("Error handling model image: {}", e.getMessage());
+                        throw new RuntimeException("Failed to update model image.");
+                    }
+                }
+
                 orderDetails.setModelNo(order.getModelNo());
                 orderDetails.setModelName(order.getModelName());
                 orderDetails.setYarnType(order.getYarnType());
@@ -124,7 +142,7 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                 orderDetails.setYarnWeight(order.getYarnWeight());
                 orderDetails.setOrderWeight(order.getOrderWeight());
                 orderDetails.setColor(order.getColor());
-                orderDetails.setImageUrl(order.getImageUrl());
+                orderDetails.setImageUrl(newModelImageUrl);
                 orderDetails.setYarnImportDate(order.getYarnImportDate());
                 orderDetails.setCenterSampleApprovedDate(order.getCenterSampleApprovedDate());
                 orderDetails.setYarnDistributionDate(order.getYarnDistributionDate());
@@ -134,37 +152,44 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                 orderDetails.setOrderCategory(order.getOrderCategory());
 
                 orderDetailsRepository.save(orderDetails);
-                log.info("Order details updated successfully");
+                log.info("Order details updated successfully for ID: {}", order.getOrderId());
                 return 1;
             }
         } catch (Exception e) {
-            log.error("Error occurred while updating order details: {}", e.getMessage());
+            log.error("Error occurred while updating order details: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to update order details. Please try again later.");
         }
     }
 
     @Override
     public int deleteOrderDetails(int orderId) {
-        try{
-            if(orderDetailsRepository.findByOrderId(orderId) == null){
-                log.error("Order details not found");
+        try {
+            OrderDetails orderDetails = orderDetailsRepository.findByOrderId(orderId);
+
+            if (orderDetails == null) {
+                log.error("Order details not found for ID: {}", orderId);
                 return 0;
-            }else{
-                OrderDetails orderDetails = orderDetailsRepository.findByOrderId(orderId);
-                String imageUrl = orderDetails.getImageUrl();
-                if(imageUrl!=null){
+            }
+
+            String imageUrl = orderDetails.getImageUrl();
+            if (imageUrl != null && imageUrl.contains("/")) {
+                try {
                     String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
                     s3Service.deleteModelImage(fileName);
+                } catch (Exception e) {
+                    log.error("Failed to delete model image for Order ID {}: {}", orderId, e.getMessage());
+                    throw new RuntimeException("Failed to delete associated image.");
                 }
-                orderDetailsRepository.delete(orderDetails);
-                log.info("Order details deleted successfully");
-                return 1;
             }
+
+            orderDetailsRepository.delete(orderDetails);
+            log.info("Order details deleted successfully for ID: {}", orderId);
+            return 1;
+
         } catch (Exception e) {
-            log.error("Error occurred while deleting order details: {}", e.getMessage());
+            log.error("Error occurred while deleting order details for ID {}: {}", orderId, e.getMessage(), e);
             throw new RuntimeException("Failed to delete order details. Please try again later.");
         }
-
     }
 
     @Override
