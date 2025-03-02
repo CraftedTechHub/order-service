@@ -151,6 +151,11 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                 return 0;
             }else{
                 OrderDetails orderDetails = orderDetailsRepository.findByOrderId(orderId);
+                String imageUrl = orderDetails.getImageUrl();
+                if(imageUrl!=null){
+                    String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+                    s3Service.deleteModelImage(fileName);
+                }
                 orderDetailsRepository.delete(orderDetails);
                 log.info("Order details deleted successfully");
                 return 1;
