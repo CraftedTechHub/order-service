@@ -1,7 +1,10 @@
 package com.KalaroApplication.KALARO_ORDERS.service.impl;
 
+import com.KalaroApplication.KALARO_ORDERS.dto.DOrdersDto;
 import com.KalaroApplication.KALARO_ORDERS.dto.OrderDetailsDto;
+import com.KalaroApplication.KALARO_ORDERS.dto.component.DDataDto;
 import com.KalaroApplication.KALARO_ORDERS.dto.component.EmpOrderDto;
+import com.KalaroApplication.KALARO_ORDERS.dto.component.SizeAndQuantityDto;
 import com.KalaroApplication.KALARO_ORDERS.entity.MasterPlan;
 import com.KalaroApplication.KALARO_ORDERS.entity.OrderDetails;
 import com.KalaroApplication.KALARO_ORDERS.entity.component.MasterPlanSub;
@@ -15,8 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -308,6 +312,75 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
             empOrderDtoList.add(empOrderDto);
         }
         return empOrderDtoList;
+    }
+
+    @Override
+    public List<DOrdersDto> getOrdersForDashboard() {
+        try {
+            List<OrderDetails> allOrderDetails = orderDetailsRepository.findAll();
+
+            if (allOrderDetails.isEmpty()) {
+                log.error("Not found order details");
+                return List.of();
+            }
+
+            List<DOrdersDto> dOrdersDtoList = new ArrayList<>();
+            for (OrderDetails orderDetails : allOrderDetails) {
+                DOrdersDto dOrderDto = new DOrdersDto();
+                dOrderDto.setOrder(orderDetails.getModelName()); // ✅ Matches JSON field "order"
+
+                // Fetch plan IDs in one go to reduce queries
+                List<MasterPlan> masterPlanList = masterPlanRepository.findAllByOrderId(orderDetails.getOrderId());
+//                List<Integer> planIds = masterPlanList.stream()
+//                        .map(MasterPlan::getPlanId)
+//                        .collect(Collectors.toList());
+
+                Set<String> uniqueCenters = masterPlanList.stream()
+                        .flatMap(masterPlan -> masterPlanSubRepository.findAllCentersByMasterPlan(masterPlan).stream())
+                        .collect(Collectors.toSet());
+
+
+                List<DDataDto> dDataDtoList = new ArrayList<>();
+                for (String center : uniqueCenters) {
+                    // Fetch masterPlanSubs in one go for this center
+                    List<MasterPlanSub> masterPlanSubList = masterPlanSubRepository.findAllByCenter(center).stream()
+                            .filter(masterPlanSub -> Objects.equals(masterPlanSub.getMasterPlan().getOrderId(), orderDetails.getOrderId()))
+                            .collect(Collectors.toList());
+
+                    DDataDto dDataDto = new DDataDto();
+                    try {
+                        dDataDto.setStartDate(orderDetails.getYarnDistributionDate());
+                        dDataDto.setExpectedCompletionDate(orderDetails.getOrderCompletionDate());
+                    } catch (DateTimeParseException e) {
+                        log.error("Error parsing date for order {}", orderDetails.getOrderId(), e);
+                        dDataDto.setStartDate(null);
+                        dDataDto.setExpectedCompletionDate(null);
+                    }
+
+                    dDataDto.setCenterName(center);
+
+                    // Convert to SizeAndQuantityDto
+                    List<SizeAndQuantityDto> sizeAndQuantityDtoList = masterPlanSubList.stream()
+                            .map(masterPlanSub -> new SizeAndQuantityDto(
+                                    masterPlanSub.getMasterPlan().getSize(),
+                                    masterPlanSub.getQty()))
+                            .collect(Collectors.toList());
+
+                    dDataDto.setSizeQuantities(sizeAndQuantityDtoList);
+                    dDataDtoList.add(dDataDto);
+                }
+
+                dOrderDto.setData(dDataDtoList);
+                dOrdersDtoList.add(dOrderDto);
+            }
+
+            log.info("All order details fetched successfully");
+            return dOrdersDtoList;
+
+        } catch (Exception e) {
+            log.error("Error fetching order details", e);
+            throw new RuntimeException("Failed to fetch orders", e);
+        }
     }
 
 }
