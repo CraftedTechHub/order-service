@@ -81,14 +81,19 @@ public class MasterPlanServiceImpl implements MasterPlanService {
                 masterPlanDto.setOrderCategory(masterPlan.getOrderCategory());
 
                 List<MasterPlanSubDto> masterPlanSubDtoList = new ArrayList<>();
-                for(MasterPlanSub masterPlanSub:masterPlan.getSubPlans()){
+                for(MasterPlanSub masterPlanSub : masterPlan.getSubPlans()) {
                     MasterPlanSubDto masterPlanSubDto = new MasterPlanSubDto();
                     masterPlanSubDto.setId(masterPlanSub.getId());
                     masterPlanSubDto.setCenter(masterPlanSub.getCenter());
                     masterPlanSubDto.setDate(masterPlanSub.getDate());
                     masterPlanSubDto.setQty(masterPlanSub.getQty());
+
+                    // ✅ Fix: Set masterPlanId instead of null
+                    masterPlanSubDto.setMasterPlan(masterPlan.getPlanId());
+
                     masterPlanSubDtoList.add(masterPlanSubDto);
                 }
+
                 masterPlanDto.setSubPlans(masterPlanSubDtoList);
                 masterPlanDtoList.add(masterPlanDto);
             }

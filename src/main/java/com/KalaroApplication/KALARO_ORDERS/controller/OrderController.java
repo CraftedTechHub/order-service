@@ -1,5 +1,6 @@
 package com.KalaroApplication.KALARO_ORDERS.controller;
 
+import com.KalaroApplication.KALARO_ORDERS.dto.DOrdersDto;
 import com.KalaroApplication.KALARO_ORDERS.dto.MasterPlanDto;
 import com.KalaroApplication.KALARO_ORDERS.dto.OrderDetailsDto;
 import com.KalaroApplication.KALARO_ORDERS.dto.component.EmpOrderDto;
@@ -222,5 +223,11 @@ public class OrderController {
     public ResponseEntity<List<EmpOrderDto>> getEmpOrders(@PathVariable String modelName){
         List<EmpOrderDto> empOrderDtoList = orderDetailsService.getEmpOrders(modelName);
         return new ResponseEntity<>(empOrderDtoList,HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/getOrdersForDashboard") //USED IN DASHBOARD
+    public ResponseEntity<List<DOrdersDto>> getOrdersForDashboard(){
+        List<DOrdersDto> dOrdersDtoList = orderDetailsService.getOrdersForDashboard();
+        return new ResponseEntity<>(dOrdersDtoList,HttpStatus.OK);
     }
 }
