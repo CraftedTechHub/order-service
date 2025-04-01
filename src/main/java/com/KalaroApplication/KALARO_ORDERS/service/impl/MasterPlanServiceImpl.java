@@ -89,7 +89,7 @@ public class MasterPlanServiceImpl implements MasterPlanService {
                     masterPlanSubDto.setQty(masterPlanSub.getQty());
 
                     // ✅ Fix: Set masterPlanId instead of null
-                    masterPlanSubDto.setMasterPlan(masterPlan.getPlanId());
+                    masterPlanSubDto.setMasterPlan(null);
 
                     masterPlanSubDtoList.add(masterPlanSubDto);
                 }

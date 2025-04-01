@@ -2,6 +2,7 @@ package com.KalaroApplication.KALARO_ORDERS.dto.component;
 
 
 import com.KalaroApplication.KALARO_ORDERS.dto.MasterPlanDto;
+import com.KalaroApplication.KALARO_ORDERS.entity.MasterPlan;
 import lombok.*;
 
 @NoArgsConstructor
@@ -14,5 +15,5 @@ public class MasterPlanSubDto {
     private String center;
     private String date;
     private int qty;
-    private int masterPlan;
+    private MasterPlan masterPlan;
 }

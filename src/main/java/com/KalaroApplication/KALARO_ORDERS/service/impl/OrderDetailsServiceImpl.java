@@ -317,7 +317,8 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
     @Override
     public List<DOrdersDto> getOrdersForDashboard() {
         try {
-            List<OrderDetails> allOrderDetails = orderDetailsRepository.findAll();
+            String category = "Ongoing orders";
+            List<OrderDetails> allOrderDetails = orderDetailsRepository.findAllByOrderCategory(category);
 
             if (allOrderDetails.isEmpty()) {
                 log.error("Not found order details");
