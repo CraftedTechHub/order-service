@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -382,6 +381,15 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
             log.error("Error fetching order details", e);
             throw new RuntimeException("Failed to fetch orders", e);
         }
+    }
+
+    @Override
+    public int getOrdersQtyForEachCenter(String centerName) {
+        List<MasterPlanSub> masterPlanSubList = masterPlanSubRepository.findAllByCenter(centerName);
+        Set<Integer> orderIds = masterPlanSubList.stream()
+                .map(mps -> mps.getMasterPlan().getOrderId())
+                .collect(Collectors.toSet());
+        return orderIds.size();
     }
 
 }
