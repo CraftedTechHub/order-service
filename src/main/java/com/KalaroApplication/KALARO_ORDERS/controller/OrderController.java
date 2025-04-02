@@ -8,8 +8,6 @@ import com.KalaroApplication.KALARO_ORDERS.service.MasterPlanService;
 import com.KalaroApplication.KALARO_ORDERS.service.OrderDetailsService;
 import com.KalaroApplication.KALARO_ORDERS.utility.HttpResponse;
 import com.KalaroApplication.KALARO_ORDERS.utility.StandardResponse;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -229,5 +227,10 @@ public class OrderController {
     public ResponseEntity<List<DOrdersDto>> getOrdersForDashboard(){
         List<DOrdersDto> dOrdersDtoList = orderDetailsService.getOrdersForDashboard();
         return new ResponseEntity<>(dOrdersDtoList,HttpStatus.OK);
+    }
+    @GetMapping(path = "/getOrdersQtyForEachCenter/{centerName}")
+    public ResponseEntity<Integer> getOrdersQtyForEachCenter(@PathVariable String centerName){
+        int qty = orderDetailsService.getOrdersQtyForEachCenter(centerName);
+        return new ResponseEntity<>(qty,HttpStatus.OK);
     }
 }
