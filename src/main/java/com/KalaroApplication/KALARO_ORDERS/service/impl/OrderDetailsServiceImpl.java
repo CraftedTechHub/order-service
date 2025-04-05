@@ -114,6 +114,43 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
         }
     }
 
+
+    @Override
+    public List<OrderDetailsDto> getOrderDetails() {
+        try {
+            List<OrderDetails> orderDetailsList = orderDetailsRepository.findAll();
+            List<OrderDetailsDto> orderDetailsDtoList = new ArrayList<>();
+
+            for (OrderDetails orderDetails : orderDetailsList) {
+                OrderDetailsDto orderDetailsDto = new OrderDetailsDto(
+                        orderDetails.getOrderId(),
+                        orderDetails.getModelNo(),
+                        orderDetails.getModelName(),
+                        orderDetails.getYarnType(),
+                        orderDetails.getCustomerName(),
+                        orderDetails.getSizeAndQuantity(),
+                        orderDetails.getYarnWeight(),
+                        orderDetails.getOrderWeight(),
+                        orderDetails.getColor(),
+                        orderDetails.getImageUrl(),
+                        orderDetails.getYarnImportDate(),
+                        orderDetails.getCenterSampleApprovedDate(),
+                        orderDetails.getYarnDistributionDate(),
+                        orderDetails.getOrderCompletionDate(),
+                        orderDetails.getDescription(),
+                        orderDetails.getNote(),
+                        orderDetails.getOrderCategory()
+                );
+                orderDetailsDtoList.add(orderDetailsDto);
+            }
+            return orderDetailsDtoList;
+        } catch (Exception e) {
+            log.error("Error occurred while fetching all orders: {}", e.getMessage());
+            throw new RuntimeException("Failed to fetch orders. Please try again later.");
+        }
+    }
+
+
     @Override
     public int updateOrderDetails(OrderDetailsDto order, MultipartFile modelImage) {
         try {

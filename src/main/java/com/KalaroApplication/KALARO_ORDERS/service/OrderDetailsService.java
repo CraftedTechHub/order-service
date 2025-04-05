@@ -26,4 +26,6 @@ public interface OrderDetailsService {
     List<DOrdersDto> getOrdersForDashboard();
 
     int getOrdersQtyForEachCenter(String centerName);
+
+    List<OrderDetailsDto> getOrderDetails();
 }

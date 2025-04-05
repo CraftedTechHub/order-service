@@ -7,6 +7,6 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: order-service
     ports:
-      - "5432:5432"
+      - "5440:5432"
     volumes:
       - ./data:/var/lib/postgresql/data
