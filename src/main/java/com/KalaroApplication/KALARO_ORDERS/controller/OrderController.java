@@ -3,6 +3,7 @@ package com.KalaroApplication.KALARO_ORDERS.controller;
 import com.KalaroApplication.KALARO_ORDERS.dto.DOrdersDto;
 import com.KalaroApplication.KALARO_ORDERS.dto.MasterPlanDto;
 import com.KalaroApplication.KALARO_ORDERS.dto.OrderDetailsDto;
+import com.KalaroApplication.KALARO_ORDERS.dto.OrderSummaryDto;
 import com.KalaroApplication.KALARO_ORDERS.dto.component.EmpOrderDto;
 import com.KalaroApplication.KALARO_ORDERS.service.MasterPlanService;
 import com.KalaroApplication.KALARO_ORDERS.service.OrderDetailsService;
@@ -140,11 +141,12 @@ public class OrderController {
         if(num == 0){
             message = "Error occurred while saving order details of Master Plan";
             statusCode = 404;
+            return new ResponseEntity<>(new StandardResponse(statusCode,message),HttpStatus.BAD_REQUEST);
         }else{
             message = "Order details saved successfully";
             statusCode = 201;
+            return new ResponseEntity<>(new StandardResponse(statusCode,message),HttpStatus.CREATED);
         }
-        return new ResponseEntity<>(new StandardResponse(statusCode,message),HttpStatus.CREATED);
     }
 
     @GetMapping(path = "/getOrderForMasterPlan/{orderId}")  //GET ORDER DETAILS //getOrderDetails/{orderId} TO /getOrderDetailsForMasterPlan/{orderId} //USED
@@ -166,11 +168,12 @@ public class OrderController {
         if(num == 0){
             message = "Order details updated successfully, including sub-plans.";
             statusCode = 404;
+            return new ResponseEntity<>(new StandardResponse(statusCode,message),HttpStatus.BAD_REQUEST);
         }else {
             message = "Error occurred while updating order details of Master Plan";
             statusCode = 200;
+            return new ResponseEntity<>(new StandardResponse(statusCode,message),HttpStatus.OK);
         }
-        return new ResponseEntity<>(new StandardResponse(statusCode,message),HttpStatus.OK);
     }
 
     @DeleteMapping(path = "/deleteMasterPlan/{planId}")  //DELETE ORDER DETAILS //deleteOrderDetails/{orderId} TO /deleteOrderDetailsForMasterPlan/{orderId} //USED
@@ -232,5 +235,11 @@ public class OrderController {
     public ResponseEntity<Integer> getOrdersQtyForEachCenter(@PathVariable String centerName){
         int qty = orderDetailsService.getOrdersQtyForEachCenter(centerName);
         return new ResponseEntity<>(qty,HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/getOrderSummary/{orderId}")
+    public ResponseEntity<OrderSummaryDto> getOrderSummary(@PathVariable int orderId){
+        OrderSummaryDto orderSummaryDto = orderDetailsService.getOrderSammary(orderId);
+        return new ResponseEntity<>(orderSummaryDto,HttpStatus.OK);
     }
 }

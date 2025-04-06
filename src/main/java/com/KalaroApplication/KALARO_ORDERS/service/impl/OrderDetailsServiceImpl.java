@@ -2,9 +2,8 @@ package com.KalaroApplication.KALARO_ORDERS.service.impl;
 
 import com.KalaroApplication.KALARO_ORDERS.dto.DOrdersDto;
 import com.KalaroApplication.KALARO_ORDERS.dto.OrderDetailsDto;
-import com.KalaroApplication.KALARO_ORDERS.dto.component.DDataDto;
-import com.KalaroApplication.KALARO_ORDERS.dto.component.EmpOrderDto;
-import com.KalaroApplication.KALARO_ORDERS.dto.component.SizeAndQuantityDto;
+import com.KalaroApplication.KALARO_ORDERS.dto.OrderSummaryDto;
+import com.KalaroApplication.KALARO_ORDERS.dto.component.*;
 import com.KalaroApplication.KALARO_ORDERS.entity.MasterPlan;
 import com.KalaroApplication.KALARO_ORDERS.entity.OrderDetails;
 import com.KalaroApplication.KALARO_ORDERS.entity.component.MasterPlanSub;
@@ -390,6 +389,46 @@ public class OrderDetailsServiceImpl implements OrderDetailsService {
                 .map(mps -> mps.getMasterPlan().getOrderId())
                 .collect(Collectors.toSet());
         return orderIds.size();
+    }
+
+    @Override
+    public OrderSummaryDto getOrderSammary(int orderId) {
+        OrderDetails orderDetails = orderDetailsRepository.findByOrderId(orderId);
+        if (orderDetails == null) {
+            log.error("Order details not found for ID: {}", orderId);
+            return null;
+        }
+
+        List<MasterPlan> masterPlanList = masterPlanRepository.findAllByOrderId(orderId);
+        //List<MasterPlanSub> masterPlanSubList = masterPlanSubRepository.findAllByMasterPlanIn(masterPlanList);
+        OrderSummaryDto orderSummaryDto = new OrderSummaryDto();
+        orderSummaryDto.setModelNo(orderDetails.getModelNo());
+        orderSummaryDto.setModelName(orderDetails.getModelName());
+        orderSummaryDto.setYarnType(orderDetails.getYarnType());
+        orderSummaryDto.setCustomerName(orderDetails.getCustomerName());
+        orderSummaryDto.setDescription(orderDetails.getDescription());
+        orderSummaryDto.setImageUrl(orderDetails.getImageUrl());
+
+        List<MasterPlanSummary> masterPlanSummaryList = new ArrayList<>();
+        for (MasterPlan masterPlan : masterPlanList) {
+            MasterPlanSummary masterPlanSummary = new MasterPlanSummary();
+            masterPlanSummary.setColor(masterPlan.getColor());
+            masterPlanSummary.setSize(masterPlan.getSize());
+            masterPlanSummary.setOrderQuantity(masterPlan.getOrderQuantity());
+
+            List<MasterPlanSubDto> masterPlanSubDtoList = new ArrayList<>();
+            for (MasterPlanSub masterPlanSub : masterPlan.getSubPlans()) {
+                    MasterPlanSubDto masterPlanSubDto = new MasterPlanSubDto();
+                    masterPlanSubDto.setCenter(masterPlanSub.getCenter());
+                    masterPlanSubDto.setDate(masterPlanSub.getDate());
+                    masterPlanSubDto.setQty(masterPlanSub.getQty());
+                    masterPlanSubDtoList.add(masterPlanSubDto);
+            }
+            masterPlanSummary.setMasterPlanSubDtos(masterPlanSubDtoList);
+            masterPlanSummaryList.add(masterPlanSummary);
+        }
+        orderSummaryDto.setMasterPlanSummary(masterPlanSummaryList);
+        return orderSummaryDto;
     }
 
 }

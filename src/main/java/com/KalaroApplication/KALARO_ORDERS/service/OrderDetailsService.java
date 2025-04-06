@@ -2,6 +2,7 @@ package com.KalaroApplication.KALARO_ORDERS.service;
 
 import com.KalaroApplication.KALARO_ORDERS.dto.DOrdersDto;
 import com.KalaroApplication.KALARO_ORDERS.dto.OrderDetailsDto;
+import com.KalaroApplication.KALARO_ORDERS.dto.OrderSummaryDto;
 import com.KalaroApplication.KALARO_ORDERS.dto.component.EmpOrderDto;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,4 +27,6 @@ public interface OrderDetailsService {
     List<DOrdersDto> getOrdersForDashboard();
 
     int getOrdersQtyForEachCenter(String centerName);
+
+    OrderSummaryDto getOrderSammary(int orderId);
 }
