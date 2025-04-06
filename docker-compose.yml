@@ -1,3 +1,4 @@
+version: '4'
 services:
   postgres:
     image: postgres:17
@@ -7,6 +8,6 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: order-service
     ports:
-      - "5440:5432"
+      - "5435:5432"
     volumes:
       - ./data:/var/lib/postgresql/data
