@@ -105,11 +105,15 @@ public class OrderController {
         return new ResponseEntity<>(orderDetailsDto2,HttpStatus.OK);
     }
 
+<<<<<<< Updated upstream
     @GetMapping(path = "/getOrderDetails")    //VIEW ORDER //USED
     public ResponseEntity<OrderDetailsDto> getOrderDetails(){
         List<OrderDetailsDto> orderDetailsDto2 =orderDetailsService.getOrderDetails();
         return new ResponseEntity(orderDetailsDto2,HttpStatus.OK);
     }
+=======
+    
+>>>>>>> Stashed changes
 
     @PutMapping(value = "/updateOrderDetails", consumes = MediaType.MULTIPART_FORM_DATA_VALUE) // EDIT EXISTING ORDER // USED
     public ResponseEntity<StandardResponse> updateOrderDetails(
