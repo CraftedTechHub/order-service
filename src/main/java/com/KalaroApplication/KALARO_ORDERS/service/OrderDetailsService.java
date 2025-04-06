@@ -29,4 +29,7 @@ public interface OrderDetailsService {
     int getOrdersQtyForEachCenter(String centerName);
 
     OrderSummaryDto getOrderSammary(int orderId);
+
+    List<OrderDetailsDto> getOrderDetails();
+
 }
